@@ -29,14 +29,26 @@ def create_app():
     # register flask-migrate extension
     from .models import migrate
     migrate.init_app(app, db)
+
+    # register flask-login extension
+    from .auth import login_manager
+    login_manager.init_app(app)
+    # 当 @login_required 装饰器检测到用户未登录时，会将用户重定向到 login_view 指定的视图
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = '请登录后访问该页面。'
+    login_manager.login_message_category = 'info'
     
     # register commands
     app.cli.add_command(db_cli)
 
-    # register blueprints
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
-    app.add_url_rule('/', endpoint='index')
+    with app.app_context():
+        # register blueprints
+        from .main import main as main_blueprint
+        app.register_blueprint(main_blueprint)
+        app.add_url_rule('/', endpoint='index')
+
+        from .auth import auth as auth_blueprint
+        app.register_blueprint(auth_blueprint)
 
     return app
 

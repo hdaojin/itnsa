@@ -25,10 +25,8 @@
 
     <main class="container pt-4">
         {%if title %}<h1>{{ title }}</h1>{% endif %}
-        <div>
-            {% block content %}
-            {% endblock content %}
-        </div>
+        {% block content %}
+        {% endblock content %}
     </main>
 
     <aside>
