@@ -1,0 +1,53 @@
+<nav class="navbar navbar-expand-lg bg-body-teriary bg-dark" data-bs-theme="dark">
+    <div class="container-fluid px-5">
+        <!-- site logo -->
+        <a class="navbar-brand" href="/">ITNSA</a>
+        <!-- 导航栏自适应折叠按钮 -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- 导航栏内容 -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% for item in nav %}
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+
+            <!-- 登录入口 -->
+            {# <div class="navbar-nav">
+                <!-- <form class="me-3">
+                            <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+                        </form> -->
+
+                {% if current_user.is_authenticated %}
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        {{ current_user.name }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">个人信息</a></li>
+                        <li><a class="dropdown-item" href="{{ logout.url }}">{{ logout.name }}</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ login.url }}"><button type="button" class="btn btn-outline-light me-3">{{ login.name
+                        }}</button></a>
+                <a href="{{ register.url }}"><button type="button" class="btn btn-warning">{{ register.name
+                        }}</button></a>
+                {% endif %} #}
+            {# </div> #}
+        </div>
+
+    </div>
+</nav>
+
