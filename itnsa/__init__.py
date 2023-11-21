@@ -3,6 +3,8 @@ from pathlib import Path
 from flask import Flask
 import config
 
+from .commands import db_cli
+
 
 def create_app():
     # create and configure the app
@@ -18,6 +20,18 @@ def create_app():
         Path(app.instance_path).mkdir(parents=True)
     except FileExistsError:
         pass
+
+    # register extensions
+    # register flask-sqlalchemy
+    from .models import db
+    db.init_app(app)
+ 
+    # register flask-migrate extension
+    from .models import migrate
+    migrate.init_app(app, db)
+    
+    # register commands
+    app.cli.add_command(db_cli)
 
     # register blueprints
     from .main import main as main_blueprint
