@@ -37,6 +37,17 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.login_message = '请登录后访问该页面。'
     login_manager.login_message_category = 'info'
+
+    # register flask-admin extension
+    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+    from flask_admin import Admin
+    from flask_admin.contrib.sqla import ModelView
+    admin = Admin(app, name='ITNSA', template_mode='bootstrap4')
+    from .models import Users, Roles, UserProfile
+    admin.add_view(ModelView(Users, db.session))
+    admin.add_view(ModelView(Roles, db.session))
+    admin.add_view(ModelView(UserProfile, db.session))
+
     
     # register commands
     app.cli.add_command(db_cli)
