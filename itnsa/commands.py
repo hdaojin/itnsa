@@ -26,9 +26,9 @@ def drop_db():
     click.echo('Dropped the database.')
 
 # Insert roles
-@db_cli.command('insert-roles')
+@db_cli.command('add-roles')
 def insert_roles():
-    """Insert default roles."""
+    """Add default roles."""
     roles = [
         {
             'name': 'admin',

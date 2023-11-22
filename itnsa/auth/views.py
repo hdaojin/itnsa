@@ -1,12 +1,10 @@
-from flask import  render_template, url_for, redirect, request, flash, current_app
+from flask import  render_template, url_for, redirect, request, flash, current_app, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import auth, login_manager
 from ..models import db, Users, Roles
 from .forms import LoginForm, RegisterForm
-
-
 
 
 # flask-login extension register a callback function that loads a user from the database. 
@@ -17,7 +15,24 @@ def load_user(user_id):
 # User register view
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    pass
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = Users(
+            username=form.username.data,
+            password=generate_password_hash(form.password.data),
+            real_name=form.real_name.data,
+            email=form.email.data,
+        )
+        role = db.session.execute(db.select(Roles).filter_by(name=form.role.data)).scalar_one_or_none()
+        if role:
+            user.roles.append(role)
+        else:
+            return abort(400)
+
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('auth.login'))
+    return render_template('form.html', form=form, title='注册')
 
 # User login view
 @auth.route('/login', methods=['GET', 'POST'])

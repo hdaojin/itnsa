@@ -22,9 +22,9 @@
             {% endfor %}
             <div class="d-flex justify-content-end">
                 <button class="btn btn-outline-success me-2" type="reset">重置</button>
-                {% if request.endpoint == 'users.register' %}
+                {% if request.endpoint == 'auth.register' %}
                 <button class="btn btn-success" type="submit">注册</button>
-                {% elif request.endpoint == 'users.login' %}
+                {% elif request.endpoint == 'auth.login' %}
                 <button class="btn btn-success" type="submit">登录</button>
                 {% else %}
                 <button class="btn btn-success" type="submit">提交</button>
