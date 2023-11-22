@@ -50,6 +50,9 @@ def create_app():
         from .auth import auth as auth_blueprint
         app.register_blueprint(auth_blueprint)
 
+        from .upload import upload as upload_blueprint
+        app.register_blueprint(upload_blueprint)
+
     return app
 
 

@@ -16,6 +16,13 @@ def inject_nav():
 
     return dict(nav=nav)
 
+@current_app.context_processor
+def inject_auth_nav():
+    register = {'name': '注册', 'url': url_for('auth.register')}
+    login = {'name': '登录', 'url': url_for('auth.login')}
+    logout = {'name': '注销', 'url': url_for('auth.logout')}
+    return dict(register=register, login=login, logout=logout)
+
 @main.route('/')
 def index():
     content = "This is the home page"
@@ -27,9 +34,4 @@ def about():
     return render_template('main/about.html', content=content, title="About")
 
 
-@current_app.context_processor
-def inject_auth_nav():
-    register = {'name': '注册', 'url': url_for('auth.register')}
-    login = {'name': '登录', 'url': url_for('auth.login')}
-    logout = {'name': '注销', 'url': url_for('auth.logout')}
-    return dict(register=register, login=login, logout=logout)
+

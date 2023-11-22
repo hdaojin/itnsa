@@ -37,6 +37,7 @@ class Users(db.Model, UserMixin):
     is_active: Mapped[bool] = mapped_column(Integer, nullable=False, insert_default=False)
     roles: Mapped[List["Roles"]] = relationship(secondary=users_roles, back_populates="users") # many-to-many relationship with Roles
     profile: Mapped["UserProfile"] = relationship(back_populates='user', cascade="all, delete-orphan") # one-to-one relationship with UserProfile. Parent. A user can only have one profile.
+    training_logs: Mapped[List["TrainingLogs"]] = relationship(back_populates='user') # one-to-many relationship with TrainingLogs. Parent. A user can have many training logs.
 
     def has_role(self, role_name):
         return role_name in [role.name for role in self.roles]
@@ -63,3 +64,15 @@ class UserProfile(db.Model):
     user: Mapped['Users'] = relationship(back_populates='profile') # one-to-one relationship with Users 
 
 
+# Define TrainingLogs table
+class TrainingLogs(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    role: Mapped[str] = mapped_column(String(64), nullable=False)
+    module: Mapped[str] = mapped_column(String(64), nullable=False)
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    uploaded_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
+    task: Mapped[str] = mapped_column(String(512), nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    file: Mapped[str] = mapped_column(String(512), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False) # one-to-many relationship with Users
+    user: Mapped['Users'] = relationship(back_populates='training_logs') # one-to-many relationship with Users

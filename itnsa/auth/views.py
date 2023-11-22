@@ -1,4 +1,4 @@
-from flask import  render_template, url_for, redirect, request, flash, current_app, abort, jsonify
+from flask import  render_template, url_for, redirect, request, flash, current_app, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -109,11 +109,6 @@ def profile(user_id):
         abort(404)
     return render_template('auth/profile.html', title='个人资料')
 
-# @current_app.context_processor
-def inject_auth_nav():
-    register = {'name': '注册', 'url': url_for('auth.register')}
-    login = {'name': '登录', 'url': url_for('auth.login')}
-    logout = {'name': '注销', 'url': url_for('auth.logout')}
-    return dict(register=register, login=login, logout=logout)
+
 
 
