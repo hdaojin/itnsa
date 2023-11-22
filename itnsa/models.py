@@ -30,7 +30,7 @@ users_roles = db.Table(
 class Users(db.Model, UserMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String(512), nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=True)
     real_name: Mapped[str] = mapped_column(String(256), nullable=True)
     registered_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())

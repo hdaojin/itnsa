@@ -13,12 +13,12 @@ def inject_nav():
 @main.route('/')
 def index():
     content = "This is the home page"
-    return render_template('pages/index.html', content=content, title="Home")
+    return render_template('main/index.html', content=content, title="Home")
 
 @main.route('/about')
 def about():
     content = "This is the about page"
-    return render_template('pages/about.html', content=content, title="About")
+    return render_template('main/about.html', content=content, title="About")
 
 
 @current_app.context_processor

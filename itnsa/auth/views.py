@@ -40,6 +40,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user_obj = db.session.execute(db.select(Users).filter_by(username=form.username.data)).scalar_one_or_none()
+        if user_obj and user_obj.is_active == 0:
+            flash('用户未激活。', 'danger')
+            return redirect(url_for('auth.login'))
         if user_obj and check_password_hash(user_obj.password, form.password.data):
             login_user(user_obj, remember=form.remember_me.data)
             flash('登录成功。', 'success')

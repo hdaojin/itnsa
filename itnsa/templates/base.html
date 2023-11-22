@@ -15,15 +15,16 @@
 </head>
 
 <body>
+    <header>
+        {% include 'header.html' %}
+    </header>
 
-    <!-- 如果访问的是首页，那么就显示header.html，否则就不显示 -->
-    {% if request.path == '/' %}
-    {% include 'header.html' %}
-    {% endif %}
-
-    {% include 'navbar.html' %}
+    <nav>
+        {% include 'navbar.html' %}
+    </nav>
 
     <main class="container pt-4">
+        {% include 'message.html' %}
         {%if title %}<h1>{{ title }}</h1>{% endif %}
         {% block content %}
         {% endblock content %}
@@ -34,22 +35,10 @@
         {% endblock %}
     </aside>
 
-    {% include 'footer.html' %}
 
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            var navLinks = document.querySelectorAll('.nav-link');
-
-            navLinks.forEach(function (link) {
-                link.addEventListener('click', function () {
-                    navLinks.forEach(function (link) {
-                        link.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                });
-            });
-        });
-    </script>
+    <footer>
+        {% include 'footer.html' %}
+    </footer>
 </body>
 
 </html>
