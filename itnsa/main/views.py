@@ -1,4 +1,5 @@
 from flask import  render_template, url_for, current_app
+from flask_login import current_user
 
 from . import main
 
@@ -8,6 +9,11 @@ def inject_nav():
         {'name': 'Home', 'url': url_for('main.index')},
         {'name': 'About', 'url': url_for('main.about')}
     ]
+
+    # 如果用户已登录并且是管理员
+    if current_user.is_authenticated and current_user.has_role('admin'):
+        nav.append({'name': 'Users', 'url': url_for('auth.users')})
+
     return dict(nav=nav)
 
 @main.route('/')

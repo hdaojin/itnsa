@@ -8,9 +8,9 @@
     <meta name="description" content="WorldSkills ITNSA">
     <meta name="keywords" content="WorldSkills ITNSA">
     <meta name="author" content="Huang Daojin">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.min.css" type="text/css">
-    <script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css"/>
     <title>{% if title %}{{ title }} | {% endif %} ITNSA </title>
 </head>
 
@@ -32,13 +32,17 @@
 
     <aside>
         {% block aside %}
-        {% endblock %}
+        {% endblock aside %}
     </aside>
 
 
     <footer>
         {% include 'footer.html' %}
     </footer>
+    <script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script src=" https://unpkg.com/gridjs/l10n/dist/l10n.umd.js"></script>
+    {% block script %}{% endblock script %}
 </body>
 
 </html>

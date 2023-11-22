@@ -1,11 +1,52 @@
 {% extends 'base.html' %}
 
+{% if current_user.is_authenticated %}
+
 {% block content %}
-
-    <ul>
-        {% for user in users %}
-            <li>{{ user.username }}</li>
-        {% endfor %}
-    </ul>
-
+<div id="users-table"></div>
 {% endblock content %}
+
+{% block script %}
+<script>
+    new gridjs.Grid({
+        columns: [
+            { id: "id", name: "ID" },
+            { id: "real_name", name: "姓名" },
+            { id: "username", name: "用户名" },
+            { id: "role", name: "角色" },
+            { id: "email", name: "邮箱" },
+            { id: "registered_on", name: "注册时间"},
+            { id: "is_active", name: "激活" },
+        ],
+        data: [
+            {% for user in users %}
+            {
+            id: "{{ user.id }}",
+            real_name: "{{ user.real_name|e }}",
+            username: "{{ user.username|e }}",
+            role: {% for role in user.roles %}"{{ role.display_name }}{% if not loop.last %}, {% endif %}"{% endfor %},
+            email: "{{ user.email|e }}",
+            registered_on: "{{ user.registered_on }}",
+            is_active: {% if user.is_active %}"是"{% else %}"否"{% endif %}
+            },
+            {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: true,
+        language: {
+        search: {
+            placeholder: "搜索...",
+        },
+        pagination: {
+            previous: "上一页",
+            next: "下一页",
+            showing: "显示",
+            results: () => "行",
+        },
+    },
+}).render(document.getElementById("users-table"));
+</script>
+{% endblock script %}
+
+{% endif %}
