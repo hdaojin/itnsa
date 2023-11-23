@@ -22,7 +22,7 @@ def get_common_roles():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
-    form.role.choices = get_common_roles()
+    form.roles.choices = get_common_roles()
     if form.validate_on_submit():
         user = Users(
             username=form.username.data,
@@ -30,7 +30,8 @@ def register():
             real_name=form.real_name.data,
             email=form.email.data,
         )
-        role = db.session.execute(db.select(Roles).filter_by(name=form.role.data)).scalar_one_or_none()
+        role = db.session.execute(db.select(Roles).filter_by(name=form.roles.data)).scalar_one_or_none()
+        print(role)
         if role:
             user.roles.append(role)
         else:
