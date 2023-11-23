@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed, FileSize
-from wtforms import StringField, DateField, RadioField, SelectField
+from wtforms import StringField, DateField, RadioField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 
@@ -26,3 +26,4 @@ class TrainingLogUploadForm(FlaskForm):
                                         FileSize(max_size=1024*1024*10, message='文件大小不能超过10M')],
                                 description="只能上传PDF文件，文件大小不能超过10M",
                                 )
+    submit = SubmitField('上传')

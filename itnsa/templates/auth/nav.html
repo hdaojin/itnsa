@@ -6,8 +6,9 @@
             {{ current_user.real_name }}
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">个人信息</a></li>
-            <li><a class="dropdown-item" href="{{ logout.url }}">{{ logout.name }}</a></li>
+            {% for item in logged_in %}
+            <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
+            {% endfor %}
         </ul>
     </div>
     {% else %}

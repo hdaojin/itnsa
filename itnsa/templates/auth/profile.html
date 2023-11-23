@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+{% if current_user.is_authenticated %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td>Username</td>
+                    <td>{{ current_user.username }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ current_user.email }}</td>
+                </tr>
+                <tr>
+                    <td>real_name</td>
+                    <td>{{ current_user.real_name }}</td>
+                </tr>
+                <tr>
+                    <td>registered_on</td>
+                    <td>{{ current_user.registered_on }}</td>
+                </tr>
+                <tr>
+                    <td>is_active</td>
+                    <td>{{ current_user.is_active }}</td>
+                </tr>
+                <tr>
+                    <td>roles</td>
+                    <td>{% for role in user.roles %}{{ role.display_name }}{% if not loop.last %}, {% endif %}{% endfor
+                        %}</td>
+                </tr>
+                {% if user.profile %}
+                <tr>
+                    <td>gender</td>
+                    <td>{{ current_user.gender }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock content %}

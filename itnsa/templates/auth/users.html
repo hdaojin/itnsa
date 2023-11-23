@@ -11,8 +11,8 @@
     new gridjs.Grid({
         columns: [
             { id: "id", name: "ID" },
-            { id: "real_name", name: "姓名" },
             { id: "username", name: "用户名" },
+            { id: "real_name", name: "姓名" },
             { id: "role", name: "角色" },
             { id: "email", name: "邮箱" },
             { id: "registered_on", name: "注册时间"},
@@ -22,8 +22,9 @@
             {% for user in users %}
             {
             id: "{{ user.id }}",
+            //username: "{{ user.username|e }}",
+            username: gridjs.html('<a class="text-decoration-none" href="{{ url_for('auth.profile', user_id=user.id) }}">{{ user.username|e }}</a>'),
             real_name: "{{ user.real_name|e }}",
-            username: "{{ user.username|e }}",
             role: {% for role in user.roles %}"{{ role.display_name }}{% if not loop.last %}, {% endif %}"{% endfor %},
             email: "{{ user.email|e }}",
             registered_on: "{{ user.registered_on }}",
@@ -45,6 +46,11 @@
             results: () => "行",
         },
     },
+        className: {
+           table: 'table table-hover',
+           thead: 'table-dark',
+           a: 'text-decoration-none'
+    }
 }).render(document.getElementById("users-table"));
 </script>
 {% endblock script %}

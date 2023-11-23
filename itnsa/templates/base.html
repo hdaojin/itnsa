@@ -23,9 +23,12 @@
         {% include 'navbar.html' %}
     </nav>
 
-    <main class="container pt-4">
+    <main class="container-fluid px-5">
         {% include 'message.html' %}
-        {%if title %}<h1>{{ title }}</h1>{% endif %}
+        <div class="d-flex justify-content-center py-4">
+                {%if title %}<h1>{{ title }}</h1>{% endif %}
+        </div>
+        
         {% block content %}
         {% endblock content %}
     </main>

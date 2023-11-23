@@ -4,8 +4,8 @@ from flask import render_template, request, url_for, redirect, flash, send_from_
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
 from flask_login import login_required, current_user
+from sqlalchemy import union
 
 from .forms import TrainingLogUploadForm
 from ..models import db, Users,  Roles, TrainingLogs
@@ -36,6 +36,9 @@ def upload_training_log():
         name = current_user.real_name
         user_id = current_user.id
         role = get_special_role_display_name()
+        if not role:
+            flash('您没有权限。', 'danger')
+            return redirect(url_for('upload.upload_training_log'))
 
         filename = "-".join([type, role, date.strftime('%Y.%m.%d'), name, module, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
 
@@ -89,20 +92,21 @@ def list(year=None, month=None, day=None):
         end_date = start_date + timedelta(days=1)
 
     # select logics
+    
+    current_user_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id))
+
     if current_user.has_role('admin'):
         training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date).order_by(TrainingLogs.date)).scalars()
     elif current_user.has_role('coach') and not current_user.has_role('admin'):
-        training_logs = select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date).order_by(TrainingLogs.date)
-        
-        # competitors = db.session.execute(db.select(UserRoles).join(Role).filter(Role.name=='competitor')).scalars()
-        # training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id.in_([current_user.id]))).scalars()
-
-    # elif current_user.has_role('competitor'):
-    #     training_logs = db.session.execute(db.select(TrainingLogs).filter_by(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id.in_([current_user.id, current_user.coach_id]))).scalars()
+        competitors_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='competitor'))
+        training_logs = db.session.execute(db.union(current_user_training_logs, competitors_training_logs)).scalars()
+    elif current_user.has_role('competitor'):
+        coach_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='coach'))
+        training_logs = db.session.execute(db.union(current_user_training_logs, coach_training_logs)).scalars()
     else:
         training_logs = []
 
-    return render_template('training_log/list.html', title='训练日志列表', training_logs=training_logs, year=year, month=month, day=day)
+    return render_template('upload/list.html', title='训练日志列表', training_logs=training_logs, year=year, month=month, day=day)
 
 
 

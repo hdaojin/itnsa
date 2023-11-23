@@ -1,9 +1,13 @@
 from typing import Any
 from flask_wtf import FlaskForm
-from wtforms import StringField, RadioField, PasswordField
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
+from wtforms import StringField, RadioField, PasswordField, SubmitField, BooleanField, SelectField, SelectMultipleField, HiddenField
+from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError, ReadOnly, Disabled
 
 from datetime import datetime
+
+from ..models import db, Users, Roles
+
+
 
 class RegisterForm(FlaskForm):
     username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=120)],
@@ -13,11 +17,11 @@ class RegisterForm(FlaskForm):
                                      description="密码长度不能少于8个字符, 且必须包含数字、小写字母、大写字母、特殊字符"
                             )
     confirm = PasswordField('确认密码', validators=[DataRequired(), Length(min=8, max=512)])
-    
     real_name = StringField('真实姓名', validators=[DataRequired(), Length(min=2, max=120)])
-    role = RadioField('角色', choices=[('competitor', '选手'), ('coach', '教练')], validators=[DataRequired()], default='competitor')
+    roles = RadioField('角色', validators=[DataRequired()])  # Dynamic choices in view function
     email = StringField('邮箱', validators=[DataRequired(), Length(min=5, max=50)])
     # recaptcha = RecaptchaField()
+    submit = SubmitField('注册')
    
     # The `validate_password` method is a custom validator that WTForms will automatically call when you invoke `form.validate()`. 
     def validate_password(form, field):
@@ -58,9 +62,18 @@ class LoginForm(FlaskForm):
                             )
     remember_me = RadioField('记住我', choices=[('1', '是'), ('0', '否')], validators=[DataRequired()], default='0')
     # recaptcha = RecaptchaField()
+    submit = SubmitField('登录')
+
+class ProfileEditByAdminForm(RegisterForm):
+    roles = SelectMultipleField('角色', validators=[DataRequired()])  # Dynamic choices in view function
+    password = HiddenField('密码',  render_kw={'disabled': True})
+    confirm = HiddenField('确认密码', render_kw={'disabled': True})
+    is_active = BooleanField('激活', validators=[DataRequired()])
+    submit = SubmitField('提交')
 
 
-
-
-
-    
+class ProfileEditByUserForm(ProfileEditByAdminForm):
+    username = StringField('用户名', render_kw={'disabled': True})
+    real_name = StringField('真实姓名', render_kw={'disabled': True})
+    roles = SelectMultipleField('角色', render_kw={'disabled': True})  # Dynamic choices in view function
+    is_active = BooleanField('激活', render_kw={'disabled': True})

@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import auth, login_manager
 from ..models import db, Users, Roles
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ProfileEditByAdminForm, ProfileEditByUserForm
 
 
 # flask-login extension register a callback function that loads a user from the database. 
@@ -13,9 +13,16 @@ def load_user(user_id):
     return db.session.execute(db.select(Users).filter_by(id=user_id)).scalar_one_or_none()
 
 # User register view
+
+# The `get_roles` function is used to dynamically generate choices for the `role` field in the `RegisterForm` form. roles except 'admin' are available for registration.
+def get_common_roles():
+    roles = db.session.execute(db.select(Roles).filter(Roles.name != 'admin').order_by(Roles.id)).scalars().all()
+    return [(role.name, role.display_name) for role in roles]
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
+    form.role.choices = get_common_roles()
     if form.validate_on_submit():
         user = Users(
             username=form.username.data,
@@ -34,39 +41,6 @@ def register():
         flash('注册成功。', 'success')
         return redirect(url_for('auth.login'))
     return render_template('form.html', form=form, title='注册')
-
-# User activate by administator view
-@auth.route('/activate/<user_id>')
-@login_required
-def activate(user_id):
-    if current_user.has_role('admin'):
-        user = db.session.execute(db.select(Users).filter_by(id=user_id)).scalar_one_or_none()
-        if user:
-            user.is_active = True
-            db.session.commit()
-            flash('用户已激活。', 'success')
-        else:
-            flash('用户不存在。', 'danger')
-    else:
-        flash('没有权限。', 'danger')
-    return redirect(url_for('auth.users'))
-
-# User deactivate by administator view
-@auth.route('/deactivate/<user_id>')
-@login_required
-def deactivate(user_id):
-    if current_user.has_role('admin'):
-        user = db.session.execute(db.select(Users).filter_by(id=user_id)).scalar_one_or_none()
-        if user:
-            user.is_active = False
-            db.session.commit()
-            flash('用户已停用。', 'success')
-        else:
-            flash('用户不存在。', 'danger')
-    else:
-        flash('没有权限。', 'danger')
-    return redirect(url_for('auth.users'))
-
 
 # User login view
 @auth.route('/login', methods=['GET', 'POST'])
@@ -96,18 +70,48 @@ def logout():
 @auth.route('/users')
 @login_required
 def users():
-    users = db.session.execute(db.select(Users).order_by(Users.id)).scalars()
-    return render_template('auth/users.html', users=users, title='用户列表')
+    if current_user.has_role('admin'):
+        users = db.session.execute(db.select(Users).order_by(Users.id)).scalars()
+        return render_template('auth/users.html', users=users, title='用户列表')
+    return abort(403)
 
 
-# User profile view
-@auth.route('/profile/<user_id>')
+# User profile view and edit view
+def get_roles():
+    roles = db.session.execute(db.select(Roles).order_by(Roles.id)).scalars().all()
+    return [(role.name, role.display_name) for role in roles]
+
+@auth.route('/user/profile/<user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
-    user = db.session.execute(db.select(Users).filter_by(id=user_id)).scalar_one_or_none()
-    if not user:
-        abort(404)
-    return render_template('auth/profile.html', title='个人资料')
+    user = db.get_or_404(Users, user_id)
+    if current_user.has_role('admin'):
+        form = ProfileEditByAdminForm(obj=user)
+        form.roles.choices = get_roles()
+        form.roles.data = [role.name for role in user.roles]
+    else:
+        form = ProfileEditByUserForm(obj=user)
+        form.roles.choices = [(role.name, role.display_name) for role in user.roles]
+        form.roles.data = [role.name for role in user.roles]
+
+    if form.validate_on_submit():
+        user.email = form.email.data
+
+        if current_user.has_role('admin'):
+            user.username = form.username.data
+            user.real_name = form.real_name.data
+            selected_roles = form.roles.data
+            roles = db.session.execute(db.select(Roles).filter(Roles.name.in_(selected_roles))).scalars().all()
+            print(roles)
+            user.roles = roles
+            user.is_active = form.is_active.data
+
+        # form.populate_obj(user)
+        db.session.commit()
+        flash('个人资料已更新。', 'success')
+        return redirect(url_for('auth.profile', user_id=user.id))
+    return render_template('form.html', form=form, title='个人资料')
+
 
 
 
