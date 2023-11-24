@@ -7,11 +7,31 @@ from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from sqlalchemy import union
 
-from .forms import TrainingLogUploadForm
-from ..models import db, Users,  Roles, TrainingLogs
+from .forms import TrainingLogUploadForm, TrainingLogModuleForm, TrainingLogTypeForm
+from ..models import db, Users,  Roles, TrainingLogs, TrainingLogModules, TrainingLogTypes
 from . import traininglog
 
 upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
+
+# Add training log module to database
+@traininglog.route('/module/add', methods=['GET', 'POST'])
+@login_required
+def add_traininglog_module():
+    if current_user.has_role('admin'):
+        form = TrainingLogModuleForm()
+        if form.validate_on_submit():
+            traininglog_module = TrainingLogModules(
+                name=form.name.data,
+                display_name=form.display_name.data,
+                description=form.description.data
+            )
+            db.session.add(traininglog_module)
+            db.session.commit()
+            flash('模块添加成功。', 'success')
+            return redirect(url_for('traininglog.add_traininglog_module'))
+        
+
+
 
 # upload training log using flask-wtf form to UPLOAD_FOLDER and save filename to database
 
