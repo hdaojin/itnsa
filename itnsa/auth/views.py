@@ -76,6 +76,15 @@ def users():
         return render_template('auth/users.html', users=users, title='用户列表')
     return abort(403)
 
+# Roles list view
+@auth.route('/roles')
+@login_required
+def roles():
+    if current_user.has_role('admin'):
+        roles = db.session.execute(db.select(Roles).order_by(Roles.id)).scalars()
+        return render_template('auth/roles.html', roles=roles, title='角色列表')
+    return abort(403)
+
 
 # User profile view and edit view
 def get_roles():

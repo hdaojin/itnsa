@@ -1,5 +1,3 @@
-{# 如果访问的是首页，显示大的，否则就显示小的 #}
-{% if request.path == '/' %}
 <div class="container-fluid">
     <div class="row  full-width-background text-center align-items-center">
         <div class="col">
@@ -8,8 +6,3 @@
         </div>
     </div>
 </div>
-{% else %}
-<div class="full-width-background-mini-height">
-    <p>这里的内容将不会显示</p>
-</div>
-{% endif %}

@@ -1,4 +1,8 @@
+{% if request.path == '/' %}
 <div class="navbar navbar-expand-lg bg-body-teriary bg-dark" data-bs-theme="dark">
+{% else %}
+<div class="navbar navbar-expand-lg bg-body-teriary bg-dark navbar-stripe fixed-top" data-bs-theme="dark">
+{% endif %}
     <div class="container-fluid px-5">
         <!-- site logo -->
         <a class="navbar-brand" href="/">ITNSA</a>
@@ -11,7 +15,7 @@
         <!-- 导航栏内容 -->
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% for item in nav %}
+                {% for item in nav.main %}
                 <li class="nav-item">
                     {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
                     {% if item.url == request.path %}
@@ -21,6 +25,38 @@
                     {% endif %}
                 </li>
                 {% endfor %}
+
+                {# 用户登录后的菜单 #}
+                {% if current_user.is_authenticated %}
+                {# 上传训练日志的菜单, 使用下拉菜单的形式 #}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="training-log" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        训练日志
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="training-log">
+                        {% for item in nav.training_log %}
+                        <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                {# 管理员菜单 #}
+                {% if current_user.is_authenticated and current_user.has_role('admin') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="admin" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                       用户管理 
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="admin">
+                        {% for item in nav.auth_admin %}
+                        <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+                
             </ul>
             <form class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">

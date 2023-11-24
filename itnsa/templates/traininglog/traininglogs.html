@@ -30,7 +30,7 @@
             module: "{{ training_log.module|e }}",
             task: "{{ training_log.task|e }}",
             type: "{{ training_log.type|e }}",
-            file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('upload.uploaded_file', filename=training_log.file) }}">{{ training_log.file|e }}</a>'),
+            file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{ training_log.file|e }}</a>'),
             upload_date: "{{ training_log.uploaded_on|e }}"
             },
             {% endfor %}

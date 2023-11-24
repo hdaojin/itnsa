@@ -6,13 +6,13 @@
             {{ current_user.real_name }}
         </button>
         <ul class="dropdown-menu">
-            {% for item in logged_in %}
+            {% for item in nav.user_logged_in %}
             <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
             {% endfor %}
         </ul>
     </div>
     {% else %}
-    <a href="{{ login.url }}"><button type="button" class="btn btn-outline-info me-2">{{ login.name }}</button></a>
-    <a href="{{ register.url }}"><button type="button" class="btn btn-outline-primary">{{ register.name }}</button></a>
+    <a href="{{ nav.auth[0].url }}"><button type="button" class="btn btn-outline-info me-2">{{ nav.auth[0].name }}</button></a>
+    <a href="{{ nav.auth[1].url }}"><button type="button" class="btn btn-outline-primary">{{ nav.auth[1].name }}</button></a>
     {% endif %}
 </div>

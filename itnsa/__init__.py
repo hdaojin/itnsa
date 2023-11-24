@@ -41,6 +41,12 @@ def create_app():
     # register commands
     app.cli.add_command(db_cli)
 
+    # Custom Jinja2 filters
+    @app.template_filter('format_date_Ym')
+    def format_date_Ym(date):
+        return date.strftime('%Y/%m')
+
+
     with app.app_context():
         # register blueprints
         from .main import main as main_blueprint
@@ -50,8 +56,8 @@ def create_app():
         from .auth import auth as auth_blueprint
         app.register_blueprint(auth_blueprint)
 
-        from .upload import upload as upload_blueprint
-        app.register_blueprint(upload_blueprint)
+        from .traininglog import traininglog as traininglog_blueprint
+        app.register_blueprint(traininglog_blueprint)
 
     return app
 

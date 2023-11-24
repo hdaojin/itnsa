@@ -15,17 +15,19 @@
 </head>
 
 <body>
+    {% if request.path == '/' %}
     <header>
         {% include 'header.html' %}
     </header>
+    {% endif %}
 
     <nav>
         {% include 'navbar.html' %}
     </nav>
 
-    <main class="container-fluid px-5">
+    <main class="container-fluid px-5 pt-5">
         {% include 'message.html' %}
-        <div class="d-flex justify-content-center py-4">
+        <div class="d-flex justify-content-center pt-5 pb-3">
                 {%if title %}<h1>{{ title }}</h1>{% endif %}
         </div>
         
