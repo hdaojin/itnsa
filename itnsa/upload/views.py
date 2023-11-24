@@ -66,15 +66,15 @@ def upload_training_log():
 
         file.save(upload_folder_path.joinpath(filename))
         flash('上传成功')
-        return redirect(url_for('training_log.list'))
+        return redirect(url_for('upload.training_logs'))
     return render_template('form.html', title='上传训练日志', form = form)
 
 # 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
-@upload.route('/list')
-@upload.route('/list/<int:year>/<int:month>/')
-@upload.route('/list/<int:year>/<int:month>/<int:day>/')
+@upload.route('/training-logs/')
+@upload.route('/training-logs/<int:year>/<int:month>/')
+@upload.route('/training-logs/<int:year>/<int:month>/<int:day>/')
 @login_required
-def list(year=None, month=None, day=None):
+def training_logs(year=None, month=None, day=None):
     if not year or not month:
         year = datetime.now().year
         month = datetime.now().month
@@ -93,22 +93,26 @@ def list(year=None, month=None, day=None):
 
     # select logics
     
-    current_user_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id))
+    current_user_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id))
 
     if current_user.has_role('admin'):
-        training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date).order_by(TrainingLogs.date)).scalars()
-    elif current_user.has_role('coach') and not current_user.has_role('admin'):
-        competitors_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='competitor'))
-        training_logs = db.session.execute(db.union(current_user_training_logs, competitors_training_logs)).scalars()
+        training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date).order_by(TrainingLogs.date)).scalars()
+    # elif current_user.has_role('coach') and not current_user.has_role('admin'):
+    #     competitors_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='competitor'))
+    #     training_logs = db.session.execute(db.union(current_user_training_logs, competitors_training_logs)).scalars()
     elif current_user.has_role('competitor'):
-        coach_training_logs = db.session.execute(db.select(TrainingLogs).filter(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='coach'))
-        training_logs = db.session.execute(db.union(current_user_training_logs, coach_training_logs)).scalars()
+        training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id)).scalars()
+    #     coach_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='coach'))
+    #     training_logs = db.session.execute(db.union(current_user_training_logs, coach_training_logs)).scalars()
     else:
         training_logs = []
 
-    return render_template('upload/list.html', title='训练日志列表', training_logs=training_logs, year=year, month=month, day=day)
+    title = start_date.strftime('%Y.%m.%d') + '-' + end_date.strftime('%Y.%m.%d') + ' 训练日志列表'
+
+    return render_template('upload/training-logs.html', title=title, training_logs=training_logs, year=year, month=month, day=day)
 
 
+# Delete training log from database and file system
 
 
 
@@ -117,7 +121,7 @@ def list(year=None, month=None, day=None):
 # def list():
 #     """ list all training logs from database"""
 
-#     training_logs = db.session.execute(db.select(TrainingLogs).filter_by(user_id=current_user.id).order_by(TrainingLogs.id)).scalars()
+#     training_logs = db.session.execute(db.select(TrainingLogs).where(user_id=current_user.id).order_by(TrainingLogs.id)).scalars()
 #     return render_template('training_log/list.html', title='训练日志列表', training_logs=training_logs)
 
 @upload.route('/veiw/<path:filename>')

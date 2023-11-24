@@ -9,7 +9,7 @@ def inject_nav():
         {'name': 'Home', 'url': url_for('main.index')},
         {'name': 'About', 'url': url_for('main.about')},
         {'name': 'Upload', 'url': url_for('upload.upload_training_log')},
-        {'name': 'Training Log', 'url': url_for('upload.list')},
+        {'name': 'Training Log', 'url': url_for('upload.training_logs')},
     ]
 
     # 如果用户已登录并且是管理员

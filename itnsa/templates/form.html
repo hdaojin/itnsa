@@ -11,7 +11,7 @@
             <div class="row mb-3">
                 {{ render_field_label(field, class="col-sm-2 offset-sm-2 col-form-label") }}
                 {% if field.type == "RadioField" %}
-                <div class="form-check col-sm-6 pt-1">
+                <div class="form-check col-sm-8 pt-1">
                     {{ render_field(field, class="list-unstyled") }}
                 </div>
                 {% elif field.type in ["SelectField", "SelectMultipleField"] %}

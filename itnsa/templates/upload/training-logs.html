@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% if current_user.is_authenticated %}
+
+{% block content %}
+<div id="training_logs-table"></div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    new gridjs.Grid({
+        columns: [
+            { id: "id", name: "序号" },
+            { id: "name", name: "姓名" },
+            { id: "role", name: "角色" },
+            { id: "date", name: "训练日期" },
+            { id: "module", name: "训练模块" },
+            { id: "task", name: "训练任务" },
+            { id: "type", name: "日志类型" },
+            { id: "file", name: "日志文件" },
+            { id: "upload_date", name: "上传时间" }
+        ],
+        data: [
+            {% for training_log in training_logs %}
+            {
+            id: "{{ loop.index }}",
+            name: "{{ training_log.user.real_name|e }}",
+            role: {% for role in training_log.user.roles %}"{{ role.display_name }}{% if not loop.last %}, {% endif %}"{% endfor %},
+            date: "{{ training_log.date|e }}",
+            module: "{{ training_log.module|e }}",
+            task: "{{ training_log.task|e }}",
+            type: "{{ training_log.type|e }}",
+            file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('upload.uploaded_file', filename=training_log.file) }}">{{ training_log.file|e }}</a>'),
+            upload_date: "{{ training_log.uploaded_on|e }}"
+            },
+            {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: true,
+        language: {
+        search: {
+            placeholder: "搜索...",
+        },
+        pagination: {
+            previous: "上一页",
+            next: "下一页",
+            showing: "显示",
+            results: () => "行",
+        },
+    },
+        className: {
+           table: 'table table-hover',
+           thead: 'table-dark',
+           a: 'text-decoration-none'
+    }
+}).render(document.getElementById("training_logs-table"));
+</script>
+{% endblock script %}
+
+{% endif %}
