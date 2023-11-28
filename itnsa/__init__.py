@@ -59,6 +59,9 @@ def create_app():
         from .traininglog import traininglog as traininglog_blueprint
         app.register_blueprint(traininglog_blueprint)
 
+        from .admin import admin as admin_blueprint
+        app.register_blueprint(admin_blueprint)
+
     return app
 
 

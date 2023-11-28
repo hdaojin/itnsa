@@ -4,7 +4,7 @@ import sys
 from flask.cli import AppGroup
 from werkzeug.security import generate_password_hash
 
-from .models import db, Users, Roles
+from .models import db, User, Role
 
 
 # Create a CLI group
@@ -47,11 +47,11 @@ def insert_roles():
         }
     ]
     for role in roles:
-        role_exists = db.session.execute(db.select(Roles).filter_by(name=role['name'])).scalar_one_or_none()
+        role_exists = db.session.execute(db.select(Role).filter_by(name=role['name'])).scalar_one_or_none()
         if role_exists:
             click.echo(f"Role {role['name']} already exists.")
             sys.exit(1)
-        role_obj = Roles(**role)
+        role_obj = Role(**role)
         db.session.add(role_obj)
     db.session.commit()
     click.echo('Inserted default roles.')
@@ -62,15 +62,15 @@ def insert_roles():
 @click.option('-p', '--password', prompt=True, hide_input=True, confirmation_prompt=True)
 def add_admin(username, password):
     """Add an administrator."""
-    admin_exists = db.session.execute(db.select(Users).filter_by(username=username)).scalar_one_or_none()
+    admin_exists = db.session.execute(db.select(User).filter_by(username=username)).scalar_one_or_none()
     if admin_exists:
         click.echo(f"User {username} already exists.")
         sys.exit(1)
     else:
-        user = Users(username=username, 
+        user = User(username=username, 
                      password=generate_password_hash(password), 
                      is_active=True)
-        role = db.session.execute(db.select(Roles).filter_by(name='admin')).scalar_one_or_none()
+        role = db.session.execute(db.select(Role).filter_by(name='admin')).scalar_one_or_none()
         if role:
             user.roles.append(role)
         else:

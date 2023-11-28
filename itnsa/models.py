@@ -19,15 +19,15 @@ db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
 
 # Define a table for the many-to-many relationship between users and roles
-users_roles = db.Table(
-    "users_roles",
+user_role = db.Table(
+    "user_role",
     # Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('role_id', Integer, ForeignKey('roles.id'), primary_key=True)
+    Column('user_id', Integer, ForeignKey('user.id'), primary_key=True),
+    Column('role_id', Integer, ForeignKey('role.id'), primary_key=True)
 )
 
-# Define users table
-class Users(db.Model, UserMixin):
+# Define user table
+class User(db.Model, UserMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
@@ -35,23 +35,23 @@ class Users(db.Model, UserMixin):
     real_name: Mapped[str] = mapped_column(String(256), nullable=True)
     registered_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     is_active: Mapped[bool] = mapped_column(Integer, nullable=False, insert_default=False)
-    roles: Mapped[List["Roles"]] = relationship(secondary=users_roles, back_populates="users") # many-to-many relationship with Roles
+    roles: Mapped[List["Role"]] = relationship(secondary=user_role, back_populates="users") # many-to-many relationship with Roles
     profile: Mapped["UserProfile"] = relationship(back_populates='user', cascade="all, delete-orphan") # one-to-one relationship with UserProfile. Parent. A user can only have one profile.
-    training_logs: Mapped[List["TrainingLogs"]] = relationship(back_populates='user') # one-to-many relationship with TrainingLogs. Parent. A user can have many training logs.
+    training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='user') # one-to-many relationship with TrainingLogs. Parent. A user can have many training logs.
 
     def has_role(self, role_name):
         return role_name in [role.name for role in self.roles]
 
 # Define roles table
-class Roles(db.Model):
+class Role(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
-    users: Mapped[List["Users"]] = relationship(secondary=users_roles, back_populates="roles") # many-to-many relationship with Users
+    users: Mapped[List["User"]] = relationship(secondary=user_role, back_populates="roles") # many-to-many relationship with Users
 
 
-# Define UserProfiles table
+# Define UserProfile table
 class UserProfile(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     gender: Mapped[str] = mapped_column(String(64))
@@ -60,36 +60,36 @@ class UserProfile(db.Model):
     join_date: Mapped[date] = mapped_column(Date)
     mobile: Mapped[int] = mapped_column(Integer)
     address: Mapped[str] = mapped_column(String(512))
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False) # one-to-one relationship with Users 
-    user: Mapped['Users'] = relationship(back_populates='profile') # one-to-one relationship with Users 
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-one relationship with Users 
+    user: Mapped['User'] = relationship(back_populates='profile') # one-to-one relationship with Users 
 
-# Define TrainingLogsModules table
-class TrainingLogsModules(db.Model):
+# Define TrainingLogsModule table
+class TrainingLogModule(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
-    training_logs: Mapped[List["TrainingLogs"]] = relationship(back_populates='module') # one-to-many relationship with TrainingLogsTasks
+    training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='module') # one-to-many relationship with TrainingLogsTasks
 
-# Define TrainingLogsType table
-class TrainingLogsType(db.Model):
+# Define TrainingLogType table
+class TrainingLogType(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
-    training_logs: Mapped[List["TrainingLogs"]] = relationship(back_populates='type') # one-to-many relationship with TrainingLogsTasks
+    training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='type') # one-to-many relationship with TrainingLogsTasks
 
 # Define TrainingLogs table
-class TrainingLogs(db.Model):
+class TrainingLog(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     role: Mapped[str] = mapped_column(String(64), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     uploaded_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     task: Mapped[str] = mapped_column(String(512), nullable=False)
     file: Mapped[str] = mapped_column(String(512), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False) # one-to-many relationship with Users
-    user: Mapped['Users'] = relationship(back_populates='training_logs') # one-to-many relationship with Users
-    module_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_logs_modules.id"), nullable=False) # one-to-many relationship with TrainingLogsModules
-    module: Mapped['TrainingLogsModules'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsModules
-    type_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_logs_type.id"), nullable=False) # one-to-many relationship with TrainingLogsType
-    type: Mapped['TrainingLogsType'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsType
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-many relationship with Users
+    user: Mapped['User'] = relationship(back_populates='training_logs') # one-to-many relationship with Users
+    module_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log_module.id"), nullable=False) # one-to-many relationship with TrainingLogsModules
+    module: Mapped['TrainingLogModule'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsModules
+    type_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log_type.id"), nullable=False) # one-to-many relationship with TrainingLogsType
+    type: Mapped['TrainingLogType'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsType

@@ -7,31 +7,11 @@ from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from sqlalchemy import union
 
-from .forms import TrainingLogUploadForm, TrainingLogModuleForm, TrainingLogTypeForm
-from ..models import db, Users,  Roles, TrainingLogs, TrainingLogModules, TrainingLogTypes
+from .forms import TrainingLogUploadForm
+from ..models import db, User,  Role, TrainingLog
 from . import traininglog
 
 upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
-
-# Add training log module to database
-@traininglog.route('/module/add', methods=['GET', 'POST'])
-@login_required
-def add_traininglog_module():
-    if current_user.has_role('admin'):
-        form = TrainingLogModuleForm()
-        if form.validate_on_submit():
-            traininglog_module = TrainingLogModules(
-                name=form.name.data,
-                display_name=form.display_name.data,
-                description=form.description.data
-            )
-            db.session.add(traininglog_module)
-            db.session.commit()
-            flash('模块添加成功。', 'success')
-            return redirect(url_for('traininglog.add_traininglog_module'))
-        
-
-
 
 # upload training log using flask-wtf form to UPLOAD_FOLDER and save filename to database
 
@@ -62,7 +42,7 @@ def upload_training_log():
 
         filename = "-".join([type, role, date.strftime('%Y.%m.%d'), name, module, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
 
-        training_log = TrainingLogs(
+        training_log = TrainingLog(
             module=module,
             date=date,
             task=task,
@@ -113,15 +93,15 @@ def list_training_logs(year=None, month=None, day=None):
 
     # select logics
     
-    current_user_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id))
+    current_user_training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.user_id==current_user.id))
 
     if current_user.has_role('admin'):
-        training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date).order_by(TrainingLogs.date)).scalars()
+        training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date).order_by(TrainingLog.date)).scalars()
     elif current_user.has_role('coach') and not current_user.has_role('admin'):
-        competitors_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='competitor'))
+        competitors_training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.role=='competitor'))
         training_logs = db.session.execute(db.union_all(current_user_training_logs, competitors_training_logs)).scalars()
     elif current_user.has_role('competitor'):
-        training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.user_id==current_user.id)).scalars()
+        training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.user_id==current_user.id)).scalars()
     #     coach_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='coach'))
     #     training_logs = db.session.execute(db.union(current_user_training_logs, coach_training_logs)).scalars()
     else:
@@ -155,7 +135,7 @@ def uploaded_file(filename):
 @login_required
 def view_training_log(id):
     """ view training log"""
-    training_log = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.id==id)).scalar_one()
+    training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
     return render_template('traininglog/single-traininglog.html', title='训练日志', training_log=training_log)
 
 

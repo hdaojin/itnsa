@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        {% from "_formhelpers.html" import render_field, render_field_label %}
+        <form method="post" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            {% for field in form %}
+            {% if field != form.csrf_token and field != form.submit and field.type != "HiddenField" %}
+            <div class="row mb-3">
+                {{ render_field_label(field, class="col-sm-2 offset-sm-2 col-form-label") }}
+                {% if field.type == "RadioField" %}
+                <div class="form-check col-sm-8 pt-1">
+                    {{ render_field(field, class="list-unstyled") }}
+                </div>
+                {% elif field.type in ["SelectField", "SelectMultipleField"] %}
+                <div class="col-sm-6">
+                    {{ render_field(field, class="form-select") }}
+                </div>
+                {% elif field.type == "BooleanField" %}
+                {# <div class="col-sm-6 form-check form-switch">
+                    {{ render_field(field, class="form-check-input") }} #}
+                    <div class="col-sm-6 pt-1">
+                        <div class="form-check form-switch">
+                            {{ render_field(field, class="form-check-input") }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-sm-6">
+                        {{ render_field(field, class="form-control") }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+                <div class="row mb-3">
+                    <div class="col-sm-10 d-flex justify-content-end">
+                        <button class="btn btn-outline-success me-2" type="reset">重置</button>
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
