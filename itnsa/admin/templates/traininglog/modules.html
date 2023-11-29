@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% for iterm in iterms %}
-{{ iterm }}
+{% for item in items %}
+<p>Modules</p>
+{{ item.name }}
 {% endfor %}
 {% endblock content %}

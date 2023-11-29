@@ -63,16 +63,16 @@ class UserProfile(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-one relationship with Users 
     user: Mapped['User'] = relationship(back_populates='profile') # one-to-one relationship with Users 
 
-# Define TrainingLogsModule table
-class TrainingLogModule(db.Model):
+# Define TrainingModule table
+class TrainingModule(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
     training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='module') # one-to-many relationship with TrainingLogsTasks
 
-# Define TrainingLogType table
-class TrainingLogType(db.Model):
+# Define TrainingType table
+class TrainingType(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
@@ -89,7 +89,7 @@ class TrainingLog(db.Model):
     file: Mapped[str] = mapped_column(String(512), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-many relationship with Users
     user: Mapped['User'] = relationship(back_populates='training_logs') # one-to-many relationship with Users
-    module_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log_module.id"), nullable=False) # one-to-many relationship with TrainingLogsModules
-    module: Mapped['TrainingLogModule'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsModules
-    type_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log_type.id"), nullable=False) # one-to-many relationship with TrainingLogsType
-    type: Mapped['TrainingLogType'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsType
+    module_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_module.id"), nullable=False) # one-to-many relationship with TrainingLogsModules
+    module: Mapped['TrainingModule'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsModules
+    type_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_type.id"), nullable=False) # one-to-many relationship with TrainingLogsType
+    type: Mapped['TrainingType'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsType

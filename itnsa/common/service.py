@@ -1,47 +1,42 @@
 # 创建一个泛型的CRUD服务类，用于处理所有模型的基本的CRUD操作
+
+from ..models import db
+
 class BaseService:
-    def __init__(self, db, model):
-        self.db = db
-        self.model = model
+    model = None
+    db = db
 
-    def create(self, **kwargs):
-        instance = self.model(**kwargs)
-        self.db.session.add(instance)
-        self.db.session.commit()
-        return instance
-
-    def get(self, id):
-        return self.db.session.execute(self.db.select(self.model).where(self.model.id == id)).scalar()
-    
-    def update(self, id, **kwargs):
-        instance = self.get(id)
-        for key, value in kwargs.items():
-            setattr(instance, key, value)
-        self.db.session.commit()
+    @classmethod
+    def create(cls, **kwargs):
+        instance = cls.model(**kwargs)
+        db.session.add(instance)
+        db.session.commit()
         return instance
     
-    def delete(self, id):
-        instance = self.get(id)
-        self.db.session.delete(instance)
-        self.db.session.commit()
-        return instance
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.db.session.execute(db.select(cls.model).where(cls.model.id == id)).scalar_one_or_none()
     
-    def list(self):
-        return self.db.session.execute(self.db.select(self.model).order_by(self.model.id)).scalars().all()
+    @classmethod
+    def update(cls, id, **kwargs):
+        instance = cls.get_by_id(id)
+        if instance:
+            for key, value in kwargs.items():
+                setattr(instance, key, value)
+            db.session.commit()
+            return instance
+        return None
+    
+    @classmethod
+    def delete(cls, id):
+        instance = cls.get_by_id(id)
+        if instance:
+            db.session.delete(instance)
+            db.session.commit()
+            return True
+        return False
+    
+    @classmethod
+    def get_all(cls):
+        return cls.db.session.execute(db.select(cls.model)).scalars()
 
-from ..models import TrainingLog, TrainingLogModule, TrainingLogType
-
-# 创建TrainingLogModuleService类，继承BaseService类，用于处理TrainingLogModule模型的CRUD操作
-class TrainingLogModuleService(BaseService):
-    def __init__(self, db):
-        super().__init__(db, TrainingLogModule)
-
-# 创建TrainingLogTypeService类，继承BaseService类，用于处理TrainingLogType模型的CRUD操作
-class TrainingLogTypeService(BaseService):
-    def __init__(self, db):
-        super().__init__(db, TrainingLogType)
-
-# 创建TrainingLogService类，继承BaseService类，用于处理TrainingLog模型的CRUD操作
-class TrainingLogService(BaseService):
-    def __init__(self, db):
-        super().__init__(db, TrainingLog)
