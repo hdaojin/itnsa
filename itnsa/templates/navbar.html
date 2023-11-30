@@ -1,5 +1,5 @@
 {% if request.path == '/' %}
-<div class="navbar navbar-expand-lg bg-body-teriary bg-dark" data-bs-theme="dark">
+<div class="navbar navbar-expand-lg bg-body-teriary bg-dark sticky-top" data-bs-theme="dark">
 {% else %}
 <div class="navbar navbar-expand-lg bg-body-teriary bg-dark navbar-stripe fixed-top" data-bs-theme="dark">
 {% endif %}
@@ -60,7 +60,7 @@
             </ul>
             <form class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
+                <button class="btn btn-outline-success me-2" type="submit">Search</button>
             </form>
 
             <!-- 登录入口 -->

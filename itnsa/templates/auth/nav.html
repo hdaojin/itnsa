@@ -1,18 +1,32 @@
 <!-- 登录入口 -->
-<div class="navbar-nav ms-2">
+<div class="navbar-nav">
     {% if current_user.is_authenticated %}
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="{{ url_for('static', filename='images/user_avatar.png') }}" class="rounded-circle" width="20" height="20" alt="avatar">
+            {% if current_user.real_name %}
             {{ current_user.real_name }}
+            {% else %}
+            {{ current_user.username }}
+            {% endif %}
         </button>
         <ul class="dropdown-menu">
             {% for item in nav.user_logged_in %}
+            {% if item.name == "注销" %}
+            <li>
+                <hr class="dropdown-divider">
+            </li>
             <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
+            {% else %}
+            <li><a class="dropdown-item" href="{{ item.url }}">{{ item.name }}</a></li>
+            {% endif %}
             {% endfor %}
         </ul>
     </div>
     {% else %}
-    <a href="{{ nav.auth[0].url }}"><button type="button" class="btn btn-outline-info me-2">{{ nav.auth[0].name }}</button></a>
-    <a href="{{ nav.auth[1].url }}"><button type="button" class="btn btn-outline-primary">{{ nav.auth[1].name }}</button></a>
+    <a href="{{ nav.auth[0].url }}"><button type="button" class="btn btn-outline-info me-2">{{ nav.auth[0].name
+            }}</button></a>
+    <a href="{{ nav.auth[1].url }}"><button type="button" class="btn btn-outline-primary">{{ nav.auth[1].name
+            }}</button></a>
     {% endif %}
 </div>

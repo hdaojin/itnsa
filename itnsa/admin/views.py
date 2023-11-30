@@ -19,7 +19,7 @@ class TrainingModuleView(BaseView):
 @admin.route('/')
 def index():
     content = "This is the admin home page"
-    return render_template('main/index.html', content=content, title="Admin Home")
+    return render_template('admin/main/index.html', content=content, title="Admin Home")
 
 # Add training module to database
 @admin.route('module/add', methods=['GET', 'POST'])

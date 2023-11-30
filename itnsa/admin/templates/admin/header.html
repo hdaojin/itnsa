@@ -1,0 +1,29 @@
+<div class="navbar navbar-expand-sm bg-dark navbar-stripe navbar-dark" data-bs-theme="dark">
+    <div class="container-fluid px-5">
+        <!-- site logo -->
+        <a class="navbar-brand" href="/">ITNSA</a>
+        <!-- 导航栏自适应折叠按钮 -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- 导航栏内容 -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">网站首页</a>
+                </li>
+            </ul>
+
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success me-2" type="submit">Search</button>
+            </form>
+
+            <!-- 登录入口 -->
+            <div class="d-flex">
+                {% include 'auth/nav.html' %}
+            </div>
+        </div>
+    </div>
+</div>
