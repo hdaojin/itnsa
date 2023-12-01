@@ -1,5 +1,5 @@
 <!-- 登录入口 -->
-<div class="navbar-nav">
+<div class="dropdown">
     {% if current_user.is_authenticated %}
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -10,7 +10,7 @@
             {{ current_user.username }}
             {% endif %}
         </button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
             {% for item in nav.user_logged_in %}
             {% if item.name == "注销" %}
             <li>

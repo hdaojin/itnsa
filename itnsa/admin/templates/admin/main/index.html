@@ -1,4 +1,6 @@
 {% extends "admin/base.html" %}
 {% block content %}
-{{ content }}
+{% for i in range(100) %}
+{{ content }}<br>
+{% endfor %}
 {% endblock %}

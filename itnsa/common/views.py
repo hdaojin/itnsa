@@ -6,15 +6,15 @@ class BaseView:
     service = BaseService
 
     @classmethod
-    def handle_form_submission(cls, form, template, **kwargs):
+    def handle_form_submission(cls, form, template, view=None, **kwargs):
         if form.validate_on_submit():
             form_data = form.data.copy()
             form_data.pop('submit', None)
             form_data.pop('csrf_token', None)
             cls.service.create(**form_data)
             flash('创建成功', 'success')
-            return redirect(url_for(template, **kwargs))
-        return render_template('form.html', form=form, **kwargs)
+            return redirect(url_for(view, **kwargs))
+        return render_template(template, form=form, **kwargs)
     
     @classmethod
     def list_all(cls, template, **kwargs):
