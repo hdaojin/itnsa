@@ -23,7 +23,10 @@
             name: "{{ role.name|e }}",
             display_name: "{{ role.display_name|e }}",
             description: "{{ role.description|e }}",
-            users: "{% for user in role.users %}{{ user.real_name }}{% if not loop.last %}, {% endif %}{% endfor %}",
+            users: "{% for user in role.users %} \
+                {% if user.real_name %}{{ user.real_name }}{% else %}{{ user.username }}{% endif %} \
+                {% if not loop.last %}, {% endif %} \
+                {% endfor %}",
             },
             {% endfor %}
         ],
