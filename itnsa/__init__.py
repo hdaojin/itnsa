@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import Flask
 import config
 
-from .commands import db_cli
+from itnsa.commands import db_cli
 
 
 def create_app():
@@ -49,18 +49,22 @@ def create_app():
 
     with app.app_context():
         # register blueprints
-        from .main import main as main_blueprint
+        from itnsa.main import main as main_blueprint
         app.register_blueprint(main_blueprint)
         app.add_url_rule('/', endpoint='index')
 
-        from .auth import auth as auth_blueprint
+        from itnsa.admin import admin as admin_blueprint
+        app.register_blueprint(admin_blueprint)
+
+        from itnsa.auth import auth as auth_blueprint
         app.register_blueprint(auth_blueprint)
 
-        from .traininglog import traininglog as traininglog_blueprint
+        from itnsa.traininglog import traininglog as traininglog_blueprint
         app.register_blueprint(traininglog_blueprint)
 
-        from .admin import admin as admin_blueprint
-        app.register_blueprint(admin_blueprint)
+        from itnsa.note import note as note_blueprint
+        app.register_blueprint(note_blueprint)
+
 
     return app
 

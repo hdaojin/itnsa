@@ -1,11 +1,11 @@
-from flask import render_template, request, url_for, redirect, flash, send_from_directory, current_app
+from flask import render_template, request, url_for, redirect, flash, send_from_directory, current_app, abort
 # from werkzeug.utils import secure_filename
 
 from pathlib import Path
 from datetime import datetime, timedelta
 
 from flask_login import login_required, current_user
-from sqlalchemy import union
+from sqlalchemy import union_all
 
 from itnsa.traininglog.forms import TrainingLogUploadForm
 from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType
@@ -37,13 +37,15 @@ def upload_training_log():
     form = TrainingLogUploadForm()
     form.module.choices = get_training_modules()
     form.type.choices = get_training_types()
-    if form.validate_on_submit():
+    if request.method == 'GET':
         form.type.default = 'WorldSkillsItnsaEliteClass'
         form.process()
+
+    if form.validate_on_submit():
         module = form.module.data
         date = form.date.data
         task = form.task.data
-        # type = form.type.data
+        type = form.type.data
         file = form.file.data
         name = current_user.real_name
         user_id = current_user.id
@@ -51,14 +53,18 @@ def upload_training_log():
         if not role:
             flash('您没有权限。', 'danger')
             return redirect(url_for('traininglog.upload_training_log'))
+        
+        training_module = db.session.execute(db.select(TrainingModule).where(TrainingModule.name==module)).scalar_one()
+        training_type = db.session.execute(db.select(TrainingType).where(TrainingType.name==type)).scalar_one()
+        complate_training_type_display_name = training_type.display_name + '训练日志'
 
-        filename = "-".join([type, role, date.strftime('%Y.%m.%d'), name, module, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        filename = "-".join([complate_training_type_display_name, role, date.strftime('%Y.%m.%d'), name, training_module.display_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
 
         training_log = TrainingLog(
-            module=module,
+            module_id=training_module.id,
             date=date,
             task=task,
-            type=type,
+            type_id=training_type.id,
             file=filename,
             user_id=user_id,
             role=role
@@ -77,8 +83,11 @@ def upload_training_log():
         upload_folder_path.mkdir(parents=True, exist_ok=True)
 
         file.save(upload_folder_path.joinpath(filename))
-        flash('上传成功')
+        flash('上传成功', 'success')
         return redirect(url_for('traininglog.list_training_logs'))
+    else:
+        print(form.errors)
+    
     return render_template('form.html', title='上传训练日志', form = form)
 
 # 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
@@ -93,10 +102,7 @@ def list_training_logs(year=None, month=None, day=None):
 
     # get a month
     start_date = datetime(year, month, 1)
-    if month == 12:
-        end_date = datetime(year+1, 1, 1)
-    else:
-        end_date = datetime(year, month+1, 1)
+    end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
 
     # if day is specified, get a day
     if day:
@@ -105,37 +111,30 @@ def list_training_logs(year=None, month=None, day=None):
 
     # select logics
     
-    current_user_training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.user_id==current_user.id))
+    query = db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date)
 
+    # Display all training logs if user is admin
     if current_user.has_role('admin'):
-        training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date).order_by(TrainingLog.date)).scalars()
-    elif current_user.has_role('coach') and not current_user.has_role('admin'):
-        competitors_training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.role=='competitor'))
-        training_logs = db.session.execute(db.union_all(current_user_training_logs, competitors_training_logs)).scalars()
-    elif current_user.has_role('competitor'):
-        training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date, TrainingLog.user_id==current_user.id)).scalars()
-    #     coach_training_logs = db.session.execute(db.select(TrainingLogs).where(TrainingLogs.date >= start_date, TrainingLogs.date < end_date, TrainingLogs.role=='coach'))
-    #     training_logs = db.session.execute(db.union(current_user_training_logs, coach_training_logs)).scalars()
+        training_logs = db.session.execute(query.order_by(TrainingLog.date)).scalars()
     else:
-        training_logs = []
+        # Get IDs of all coaches and competitors
+        coaches_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='coach')).scalars().all()
+        competitors_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='competitor')).scalars().all()
+        # If current user if a coach who can view all training logs of competitors and himself
+        if current_user.has_role('coach') and not current_user.has_role('admin'):
+            allowed_ids = [current_user.id] + competitors_ids
+        # If current user if a competitor who can view all training logs of coaches and himself
+        elif current_user.has_role('competitor'):
+            allowed_ids = [current_user.id] + coaches_ids
+        else:
+            allowed_ids = [current_user.id]
+        
+        training_logs = db.session.execute(query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(TrainingLog.date)).scalars()
 
     end_date = end_date - timedelta(days=1)
-    title = start_date.strftime('%Y.%m.%d') + '-' + end_date.strftime('%Y.%m.%d') + ' 训练日志列表'
+    title = f"{start_date.strftime('%Y.%m.%d')} - {end_date.strftime('%Y.%m.%d')} 训练日志列表"
 
-    return render_template('traininglog/traininglogs.html', title=title, training_logs=training_logs, year=year, month=month, day=day)
-
-
-# Delete training log from database and file system
-
-
-
-# @traininglog.route('/list/<role>')
-# @login_required
-# def list():
-#     """ list all training logs from database"""
-
-#     training_logs = db.session.execute(db.select(TrainingLogs).where(user_id=current_user.id).order_by(TrainingLogs.id)).scalars()
-#     return render_template('training_log/list.html', title='训练日志列表', training_logs=training_logs)
+    return render_template('traininglog/list.html', title=title, training_logs=training_logs, year=year, month=month, day=day)
 
 # view training log
 @traininglog.route('/view/<path:filename>')
@@ -148,6 +147,24 @@ def uploaded_file(filename):
 def view_training_log(id):
     """ view training log"""
     training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
-    return render_template('traininglog/single-traininglog.html', title='训练日志', training_log=training_log)
+    return render_template('traininglog/view.html', title='训练日志', training_log=training_log)
 
 
+# Delete training log from database and file system
+# Delete training log from database
+@traininglog.route('/delete/<int:id>')
+@login_required
+def delete_training_log(id):
+    """ delete training log"""
+    # User can only delete his/her own training log except admin
+    if not current_user.has_role('admin'):
+        training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
+        if training_log.user_id != current_user.id:
+            abort(403)
+
+    taining_log_path = upload_folder.joinpath(training_log.date.strftime('%Y'), training_log.date.strftime('%m'), training_log.file)
+    taining_log_path.unlink()
+    db.session.delete(training_log)
+    db.session.commit()
+    flash('删除成功', 'success')
+    return redirect(url_for('traininglog.list_training_logs'))

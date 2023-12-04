@@ -2,8 +2,7 @@ from pathlib import Path
 
 
 SECRET_KEY = 'DEV'
-# MARKDOWN_DIR = Path(r'D:\markdown\teaching-notes-Ansible')
-MARKDOWN_DIR = Path(__file__).parent.joinpath('instance', 'markdown_files')
+NOTE_FOLDER = Path(__file__).parent.joinpath('instance', 'markdown_notes')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(Path(__file__).parent.joinpath('instance', 'itnsa.sqlite'))
 
 # Settings for training log upload 

@@ -32,12 +32,10 @@
                     <td>{% for role in user.roles %}{{ role.display_name }}{% if not loop.last %}, {% endif %}{% endfor
                         %}</td>
                 </tr>
-                {% if user.profile %}
                 <tr>
                     <td>gender</td>
                     <td>{{ current_user.gender }}</td>
                 </tr>
-                {% endif %}
             </tbody>
         </table>
     </div>

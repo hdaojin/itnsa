@@ -1,7 +1,7 @@
 from typing import Any
 from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField, PasswordField, SubmitField, BooleanField, SelectField, SelectMultipleField, HiddenField
-from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError, ReadOnly, Disabled
+from wtforms.validators import DataRequired, InputRequired, Length, EqualTo, Email, ValidationError, ReadOnly, Disabled
 
 from datetime import datetime
 
@@ -11,7 +11,7 @@ from datetime import datetime
 
 class RegisterForm(FlaskForm):
     username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=120)],
-                           render_kw={'placeholder': '请使用姓名拼音全拼'})
+                           render_kw={'placeholder': '用于登录的用户名'})
     password = PasswordField('密码', validators=[DataRequired(), Length(min=8, max=512),
                                                EqualTo('confirm', message='两次输入的密码不一致')],
                                      description="密码长度不能少于8个字符, 且必须包含数字、小写字母、大写字母、特殊字符"
@@ -68,7 +68,7 @@ class ProfileEditByAdminForm(RegisterForm):
     roles = SelectMultipleField('角色', validators=[DataRequired()])  # Dynamic choices in view function
     password = HiddenField('密码',  render_kw={'disabled': True})
     confirm = HiddenField('确认密码', render_kw={'disabled': True})
-    is_active = BooleanField('激活', validators=[DataRequired()])
+    is_active = BooleanField('激活') # InputRequired() 验证器会验证用户是否勾选了复选框，可以允许用户不勾选复选框，为False
     submit = SubmitField('提交')
 
 

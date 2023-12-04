@@ -69,25 +69,6 @@ def logout():
     flash('注销成功。', 'success')
     return redirect(url_for('auth.login'))
 
-# Users list view
-@auth.route('/users')
-@login_required
-def users():
-    if current_user.has_role('admin'):
-        users = db.session.execute(db.select(User).order_by(User.id)).scalars()
-        return render_template('auth/users.html', users=users, title='用户列表')
-    return abort(403)
-
-# Roles list view
-@auth.route('/roles')
-@login_required
-def roles():
-    if current_user.has_role('admin'):
-        roles = db.session.execute(db.select(Role).order_by(Role.id)).scalars()
-        return render_template('auth/roles.html', roles=roles, title='角色列表')
-    return abort(403)
-
-
 # User profile view and edit view
 def get_roles():
     roles = db.session.execute(db.select(Role).order_by(Role.id)).scalars().all()
@@ -100,11 +81,13 @@ def profile(user_id):
     if current_user.has_role('admin'):
         form = ProfileEditByAdminForm(obj=user)
         form.roles.choices = get_roles()
-        form.roles.data = [role.name for role in user.roles]
+        if request.method == 'GET':
+            form.roles.data = [role.name for role in user.roles]
     else:
         form = ProfileEditByUserForm(obj=user)
         form.roles.choices = [(role.name, role.display_name) for role in user.roles]
-        form.roles.data = [role.name for role in user.roles]
+        if request.method == 'GET':
+            form.roles.data = [role.name for role in user.roles]
 
     if form.validate_on_submit():
         user.email = form.email.data
@@ -113,9 +96,8 @@ def profile(user_id):
             user.username = form.username.data
             user.real_name = form.real_name.data
             selected_roles = form.roles.data
-            roles = db.session.execute(db.select(Role).filter(Role.name.in_(selected_roles))).scalars().all()
-            print(roles)
-            user.roles = roles
+            new_roles = db.session.execute(db.select(Role).filter(Role.name.in_(selected_roles))).scalars().all()
+            user.roles = new_roles
             user.is_active = form.is_active.data
 
         # form.populate_obj(user)
