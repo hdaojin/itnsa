@@ -7,13 +7,21 @@ from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from sqlalchemy import union
 
-from .forms import TrainingLogUploadForm
-from ..models import db, User,  Role, TrainingLog
-from . import traininglog
+from itnsa.traininglog.forms import TrainingLogUploadForm
+from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType
+from itnsa.traininglog import traininglog
 
 upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
 
 # upload training log using flask-wtf form to UPLOAD_FOLDER and save filename to database
+
+def get_training_modules():
+    training_modules = db.session.execute(db.select(TrainingModule).order_by(TrainingModule.id)).scalars().all()
+    return [(training_module.name, training_module.display_name) for training_module in training_modules]
+
+def get_training_types():
+    training_types = db.session.execute(db.select(TrainingType).order_by(TrainingType.id)).scalars().all()
+    return [(training_type.name, training_type.display_name) for training_type in training_types]
 
 def get_special_role_display_name():
     # 检查用户是否拥有'coach'或'competitor'角色，如果有，则返回该角色的display_name，否则返回None
@@ -27,11 +35,15 @@ def get_special_role_display_name():
 def upload_training_log():
     """ Upload training log to server."""
     form = TrainingLogUploadForm()
+    form.module.choices = get_training_modules()
+    form.type.choices = get_training_types()
     if form.validate_on_submit():
+        form.type.default = 'WorldSkillsItnsaEliteClass'
+        form.process()
         module = form.module.data
         date = form.date.data
         task = form.task.data
-        type = form.type.data
+        # type = form.type.data
         file = form.file.data
         name = current_user.real_name
         user_id = current_user.id

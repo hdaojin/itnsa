@@ -23,6 +23,8 @@ def get_common_roles():
 def register():
     form = RegisterForm()
     form.roles.choices = get_common_roles()
+    # form.roles.default = 'competitor'
+    # form.process()
     if form.validate_on_submit():
         user = User(
             username=form.username.data,

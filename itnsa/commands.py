@@ -25,11 +25,6 @@ default_roles = [
         'description': '选手角色。'
     },
     {
-        'name': 'student',
-        'display_name': '学生',
-        'description': '学生角色。'
-    },
-    {
         'name': 'guest',
         'display_name': '游客',
         'description': '游客角色。'
@@ -76,12 +71,12 @@ traning_modules = [
 
 traning_types = [
     {
-        'name': 'WorldSkillsITNSA',
-        'display_name': '世界技能大赛网络系统管理项目',
+        'name': 'WorldSkillsItnsaEliteClass',
+        'display_name': '世界技能大赛网络系统管理项目精英班',
         'description': '世界技能大赛网络系统管理项目精英班和种子选手日常训练。'
     },
     {
-        'name': 'WorldSkillsITNSAChinaTeam',
+        'name': 'WorldSkillsItnsaChinaTeam',
         'display_name': '世界技能大赛网络系统管理项目中国集训队',
         'description': '世界技能大赛网络系统管理项目中国集训队集中训练，强化训练。'
     }
