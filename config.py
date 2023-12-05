@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 SECRET_KEY = 'DEV'
+SECRET_SALT = 'DEV'
 NOTE_FOLDER = Path(__file__).parent.joinpath('instance', 'markdown_notes')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(Path(__file__).parent.joinpath('instance', 'itnsa.sqlite'))
 

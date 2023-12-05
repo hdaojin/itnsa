@@ -3,6 +3,8 @@ from flask_login import login_required
 
 from pathlib import Path
 import markdown2
+import markdown
+import mistune, frontmatter
 import re
 
 from itnsa.note import note
@@ -17,6 +19,16 @@ markdown2_extras = [
     "fenced-code-blocks",
     "break-on-newline",
     "footnotes",
+
+]
+
+markdown_extras = [
+    # "extra",
+    # "meta",
+    # "nl2br",
+    # # "sane_lists",
+    # "toc",
+    # "smarty",
 ]
 
 # List all note folders as a list of html
@@ -67,13 +79,30 @@ def view_readme(directory):
     else:
         return "README.md not found", 404
 
-# Convert markdown to html
-def markdown_to_html(markdown_file):
+# Convert markdown to html using markdown2 module
+def markdown2_to_html(markdown_file):
     """Convert markdown to html."""
     with open(markdown_file, 'r', encoding='utf-8') as f:
         content = f.read()
     html = markdown2.markdown(content, extras=markdown2_extras)
     return html
+
+# Convert markdown to html using markdown module
+def markdown_to_html(markdown_file):
+    """Convert markdown to html."""
+    with open(markdown_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+    html = markdown.markdown(content, extensions=markdown_extras)
+    return html
+
+# Convert markdown to html using mistune module
+def mistune_to_html(markdown_file):
+    """Convert markdown to html."""
+    with open(markdown_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        metadata, content = frontmatter.parse(content)        
+        html = mistune.html(content)
+    return html, metadata
 
 # Show markdown file as html
 @note.route('<path:directory>/<file>')
@@ -83,5 +112,7 @@ def view_note(directory, file):
     markdown_file = note_folder.joinpath(directory, file + '.md')
     if not markdown_file.exists():
         return "File not found", 404
-    html = markdown_to_html(markdown_file)
-    return render_template('note/view_note.html', html=html, title=file)
+    # html = markdown_to_html(markdown_file)
+    html, metadata = mistune_to_html(markdown_file)
+    metadata = {k.lower(): v for k, v in metadata.items()}
+    return render_template('note/view_note.html', meta=metadata, content=html)

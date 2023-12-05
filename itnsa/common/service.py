@@ -1,6 +1,6 @@
 # 创建一个泛型的CRUD服务类，用于处理所有模型的基本的CRUD操作
 
-from ..models import db
+from itnsa.models import db
 
 class BaseService:
     model = None
@@ -39,4 +39,6 @@ class BaseService:
     @classmethod
     def get_all(cls):
         return cls.db.session.execute(db.select(cls.model)).scalars()
+
+
 

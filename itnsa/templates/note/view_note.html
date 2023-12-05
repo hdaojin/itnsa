@@ -2,6 +2,32 @@
 
 {% block content %}
 
-   <div>{{ html|safe }}</div> 
+<article class="traininglog markdown-body">
+   <div class="text-center fs-2">
+      <p>{{ meta['document'] }}({{ meta['role'] }})</p>
+   </div>
+   <table class="table table-bordered">
+      <thead class="text-center">
+         <tr>
+            <td class="key table-light">日期</td>
+            <td class="value">{{ meta['date'] }}</td>
+            <td class="key table-light">教练姓名</td>
+            <td class="value">{{ meta['author'] }}</td>
+            <td class="key table-light">模块</td>
+            <td class="value">{{meta['subject'] }}</td>
+         </tr>
+         <tr>
+            <td class="key table-light">训练任务</td>
+            <td colspan="5" class="value">{{ meta['task'] }}</td>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td colspan="6" class="value">{{ content|safe }} </td>
+         </tr>
+      </tbody>
+
+   </table>
+</article>
 
 {% endblock content %}

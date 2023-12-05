@@ -2,9 +2,11 @@ from flask import  render_template, url_for, redirect, request, flash, current_a
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from . import auth, login_manager
-from ..models import db, User, Role
+from itnsa.models import db, User, Role, UserProfile
+from itnsa.common.views import validate_registration_link
+
 from .forms import LoginForm, RegisterForm, ProfileEditByAdminForm, ProfileEditByUserForm
+from . import auth, login_manager
 
 
 # flask-login extension register a callback function that loads a user from the database. 
@@ -21,6 +23,11 @@ def get_common_roles():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    token = request.args.get('token') # get token from url
+    if not validate_registration_link(token): # validate token
+        flash('注册链接无效或已过期。', 'danger')
+        return redirect(url_for('main.index'))
+
     form = RegisterForm()
     form.roles.choices = get_common_roles()
     # form.roles.default = 'competitor'
@@ -91,6 +98,9 @@ def profile(user_id):
 
     if form.validate_on_submit():
         user.email = form.email.data
+        # user.profile.gender = form.gender.data
+        # user.profile.id_card = form.id_card.data
+        user.profile.mobile = form.mobile.data
 
         if current_user.has_role('admin'):
             user.username = form.username.data

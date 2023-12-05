@@ -1,5 +1,7 @@
 # 创建一些辅助函数，用于处理视图函数中的一些通用的操作
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, current_app
+from itsdangerous import URLSafeTimedSerializer
+
 from .service import BaseService
 
 class BaseView:
@@ -21,3 +23,19 @@ class BaseView:
         items = cls.service.get_all()
         print(items)
         return render_template(template, items=cls.service.get_all(), **kwargs)
+
+
+# 通过加密令牌生成注册链接
+def generate_registration_link():
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    token = serializer.dumps('register', salt=current_app.config['SECRET_SALT'])
+    link = url_for('auth.register', token=token, _external=True)
+    return link
+
+def validate_registration_link(token, max_age=3600):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        data = serializer.loads(token, salt=current_app.config['SECRET_SALT'], max_age=max_age)
+        return data == 'register'
+    except:
+        return False

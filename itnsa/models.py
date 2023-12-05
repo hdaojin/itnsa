@@ -54,12 +54,12 @@ class Role(db.Model):
 # Define UserProfile table
 class UserProfile(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    gender: Mapped[str] = mapped_column(String(64))
-    id_card: Mapped[int] = mapped_column(Integer)
-    birthday: Mapped[date] = mapped_column(Date)
-    join_date: Mapped[date] = mapped_column(Date)
-    mobile: Mapped[int] = mapped_column(Integer)
-    address: Mapped[str] = mapped_column(String(512))
+    gender: Mapped[str] = mapped_column(String(64), nullable=True)
+    id_card: Mapped[int] = mapped_column(Integer, nullable=True)
+    birthday: Mapped[date] = mapped_column(Date, nullable=True)
+    join_date: Mapped[date] = mapped_column(Date, nullable=True)
+    mobile: Mapped[int] = mapped_column(Integer, nullable=True)
+    address: Mapped[str] = mapped_column(String(512), nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-one relationship with Users 
     user: Mapped['User'] = relationship(back_populates='profile') # one-to-one relationship with Users 
 

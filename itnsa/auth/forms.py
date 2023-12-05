@@ -69,6 +69,9 @@ class ProfileEditByAdminForm(RegisterForm):
     password = HiddenField('密码',  render_kw={'disabled': True})
     confirm = HiddenField('确认密码', render_kw={'disabled': True})
     is_active = BooleanField('激活') # InputRequired() 验证器会验证用户是否勾选了复选框，可以允许用户不勾选复选框，为False
+    # gender = RadioField('性别', choices=[('男', '男'), ('女', '女')], validators=[DataRequired()])
+    # id_card = StringField('身份证号', validators=[DataRequired(), Length(min=18, max=18)])
+    mobile = StringField('手机号')
     submit = SubmitField('提交')
 
 
