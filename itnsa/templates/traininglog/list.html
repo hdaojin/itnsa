@@ -3,7 +3,9 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
+
 <div id="training_logs-table"></div>
+
 {% endblock content %}
 
 {% block script %}
@@ -24,9 +26,9 @@
     data: [
     {% for training_log in training_logs %}
     {
-        id: "{{ loop.index }}",
+    id: "{{ loop.index }}",
     name: "{{ training_log.user.real_name | e }}",
-    role: {% for role in training_log.user.roles %}"{{ role.display_name }}{% if not loop.last %}, {% endif %}"{% endfor %},
+    role: "{% for role in training_log.user.roles %}{{ role.display_name|e }}{% if not loop.last %}, {% endif %}{% endfor %}",
     date: "{{ training_log.date | e }}",
     module: "{{ training_log.module.display_name | e }}",
     task: "{{ training_log.task | e }}",
@@ -34,25 +36,25 @@
     file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{ training_log.file | e }}</a>'),
     upload_date: "{{ training_log.uploaded_on | e }}",
     operation: {% if training_log.user_id == current_user.id %}gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>'){% else %} "删除"{% endif %}
-            },
+    },
     {% endfor %}
     ],
     search: true,
     sort: true,
     pagination: true,
     language: {
-        search: {
-        placeholder: "搜索...",
-        },
+    search: {
+    placeholder: "搜索...",
+    },
     pagination: {
-        previous: "上一页",
+    previous: "上一页",
     next: "下一页",
     showing: "显示",
-                        results: () => "行",
-        },
+    results: () => "行",
+    },
     },
     className: {
-        table: 'table table-hover',
+    table: 'table table-hover',
     thead: 'table-dark',
     a: 'text-decoration-none'
     }

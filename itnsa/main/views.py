@@ -31,6 +31,8 @@ def inject_nav():
                 {'name': '教学笔记', 'url': url_for('note.list_note_folders')}
             ]
         }
+        if current_user.has_role('admin'):
+            user_nav['user_logged_in'].insert(0, {'name': '管理后台', 'url': url_for('admin.index')})
         nav.update(user_nav)
 
     return dict(nav=nav)

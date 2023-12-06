@@ -36,8 +36,9 @@ class User(db.Model, UserMixin):
     registered_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     is_active: Mapped[bool] = mapped_column(Integer, nullable=False, insert_default=False)
     roles: Mapped[List["Role"]] = relationship(secondary=user_role, back_populates="users") # many-to-many relationship with Roles
-    profile: Mapped["UserProfile"] = relationship(back_populates='user', cascade="all, delete-orphan") # one-to-one relationship with UserProfile. Parent. A user can only have one profile.
+    profile: Mapped["UserProfile"] = relationship(back_populates='user', cascade="all, delete-orphan", uselist=False) # one-to-one relationship with UserProfile. Parent. A user can only have one profile.
     training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='user') # one-to-many relationship with TrainingLogs. Parent. A user can have many training logs.
+    Evaluation: Mapped[List["TrainingLogEvaluation"]] = relationship(back_populates='user', lazy='dynamic') # one-to-many relationship with TrainingLogEvaluation. Parent. A user can have many evaluations.
 
     def has_role(self, role_name):
         return role_name in [role.name for role in self.roles]
@@ -54,12 +55,24 @@ class Role(db.Model):
 # Define UserProfile table
 class UserProfile(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    student_id: Mapped[int] = mapped_column(Integer, nullable=True)
     gender: Mapped[str] = mapped_column(String(64), nullable=True)
     id_card: Mapped[int] = mapped_column(Integer, nullable=True)
     birthday: Mapped[date] = mapped_column(Date, nullable=True)
-    join_date: Mapped[date] = mapped_column(Date, nullable=True)
     mobile: Mapped[int] = mapped_column(Integer, nullable=True)
     address: Mapped[str] = mapped_column(String(512), nullable=True)
+    original_class: Mapped[str] = mapped_column(String(128), nullable=True)
+    original_class_manager: Mapped[str] = mapped_column(String(64), nullable=True)
+    original_class_manager_mobile: Mapped[int] = mapped_column(Integer, nullable=True)
+    dormitory: Mapped[str] = mapped_column(String(128), nullable=True)
+    emergency_contact: Mapped[str] = mapped_column(String(128), nullable=True)
+    emergency_contact_mobile: Mapped[int] = mapped_column(Integer, nullable=True)
+    join_date: Mapped[date] = mapped_column(Date, nullable=True)
+    class_student_id: Mapped[int] = mapped_column(Integer, nullable=True)
+    state: Mapped[str] = mapped_column(String(64), nullable=True)
+    departure_date: Mapped[date] = mapped_column(Date, nullable=True)
+    competition_results: Mapped[str] = mapped_column(String, nullable=True)
+    honors: Mapped[str] = mapped_column(String, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-one relationship with Users 
     user: Mapped['User'] = relationship(back_populates='profile') # one-to-one relationship with Users 
 
@@ -93,3 +106,15 @@ class TrainingLog(db.Model):
     module: Mapped['TrainingModule'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsModules
     type_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_type.id"), nullable=False) # one-to-many relationship with TrainingLogsType
     type: Mapped['TrainingType'] = relationship(back_populates='training_logs') # one-to-many relationship with TrainingLogsType
+    evaluation: Mapped['TrainingLogEvaluation'] = relationship(back_populates='training_log', uselist=False, cascade="all, delete-orphan") # one-to-one relationship with TrainingLogEvaluation. Child. A training log can only have one evaluation.
+
+# Define TrainingLog Evaluation table
+class TrainingLogEvaluation(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    score: Mapped[int] = mapped_column(Integer, nullable=True)
+    comment: Mapped[str] = mapped_column(String(1024), nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-many relationship with Users
+    user: Mapped['User'] = relationship(back_populates='Evaluation') # one-to-many relationship with Users
+    training_log_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log.id"), nullable=False) # one-to-many relationship with TrainingLogs
+    training_log: Mapped['TrainingLog'] = relationship(back_populates='evaluation') # one-to-many relationship with TrainingLogs
+

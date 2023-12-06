@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed, FileSize
-from wtforms import StringField, DateField, RadioField, SelectField, SubmitField
-from wtforms.validators import DataRequired, Length
+from wtforms import StringField, DateField, RadioField, SelectField, SubmitField, IntegerField, TextAreaField
+from wtforms.validators import DataRequired, Length, NumberRange, Optional
 
 class TrainingLogUploadForm(FlaskForm):
     module = SelectField('模块', validators=[DataRequired()]) # Dynamic choices in view function
@@ -15,3 +15,8 @@ class TrainingLogUploadForm(FlaskForm):
                                 description="只能上传PDF文件，文件大小不能超过10M",
                                 )
     submit = SubmitField('上传')
+
+class TrainingLogEvaluationForm(FlaskForm):
+    score = IntegerField('完成度', validators=[DataRequired(), NumberRange(min=0, max=100, message='完成度必须在0到100之间的整数')])
+    comment = TextAreaField('评价', validators=[Optional(), Length(max=1024, message='评价长度不能超过1024个字符')])
+    submit = SubmitField('提交')

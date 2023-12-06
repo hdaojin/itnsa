@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% if not current_user.is_authenticated %}
+
+{% block content %}
+
+{% include '_form.html' %}
+
+{% endblock content %}
+
+{% endif %}

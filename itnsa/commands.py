@@ -4,7 +4,7 @@ import sys
 from flask.cli import AppGroup
 from werkzeug.security import generate_password_hash
 
-from itnsa.models import db, User, Role, TrainingModule, TrainingType
+from itnsa.models import db, User, UserProfile, Role, TrainingModule, TrainingType
 
 
 # Define default roles, training-modules and training-types
@@ -136,6 +136,10 @@ def add_admin(username, password):
             click.echo('Role admin does not exist.')
             sys.exit(1)
         db.session.add(user)
+        db.session.commit()
+
+        profile = UserProfile(user_id=user.id)
+        db.session.add(profile)
         db.session.commit()
         click.echo(f"Administrator {username} added.")
 

@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itnsa.models import db, User, Role, UserProfile
 from itnsa.common.views import validate_registration_link
 
-from .forms import LoginForm, RegisterForm, ProfileEditByAdminForm, ProfileEditByUserForm
+from .forms import LoginForm, RegisterForm, UserEditByAdminForm, UserEditByUserForm, ProfileEditForm
 from . import auth, login_manager
 
 
@@ -48,9 +48,15 @@ def register():
 
         db.session.add(user)
         db.session.commit()
+
+        # Create a user profile instance
+        profile = UserProfile(user_id=user.id)
+        db.session.add(profile)
+        db.session.commit()
+
         flash('注册成功。', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('form.html', form=form, title='注册')
+    return render_template('auth/register.html', form=form, title='注册')
 
 # User login view
 @auth.route('/login', methods=['GET', 'POST'])
@@ -66,7 +72,7 @@ def login():
             flash('登录成功。', 'success')
             return redirect(request.args.get('next') or url_for('main.index'))
         flash('用户名或密码错误。', 'danger')
-    return render_template('form.html', form=form, title='登录')
+    return render_template('auth/login.html', form=form, title='登录')
 
 # User logout view
 @auth.route('/logout')
@@ -86,35 +92,37 @@ def get_roles():
 def profile(user_id):
     user = db.get_or_404(User, user_id)
     if current_user.has_role('admin'):
-        form = ProfileEditByAdminForm(obj=user)
-        form.roles.choices = get_roles()
+        user_form = UserEditByAdminForm(obj=user)
+        user_form.roles.choices = get_roles()
         if request.method == 'GET':
-            form.roles.data = [role.name for role in user.roles]
+            user_form.roles.data = [role.name for role in user.roles]
     else:
-        form = ProfileEditByUserForm(obj=user)
-        form.roles.choices = [(role.name, role.display_name) for role in user.roles]
+        user_form = UserEditByUserForm(obj=user)
+        user_form.roles.choices = [(role.name, role.display_name) for role in user.roles]
         if request.method == 'GET':
-            form.roles.data = [role.name for role in user.roles]
+            user_form.roles.data = [role.name for role in user.roles]
 
-    if form.validate_on_submit():
-        user.email = form.email.data
-        # user.profile.gender = form.gender.data
-        # user.profile.id_card = form.id_card.data
-        user.profile.mobile = form.mobile.data
+    profile_form = ProfileEditForm(obj=user.profile)
 
+    if 'user_edit_submit' in request.form and user_form.validate_on_submit():
+        user.email = user_form.email.data
         if current_user.has_role('admin'):
-            user.username = form.username.data
-            user.real_name = form.real_name.data
-            selected_roles = form.roles.data
+            user.username = user_form.username.data
+            user.real_name = user_form.real_name.data
+            selected_roles = user_form.roles.data
             new_roles = db.session.execute(db.select(Role).filter(Role.name.in_(selected_roles))).scalars().all()
             user.roles = new_roles
-            user.is_active = form.is_active.data
-
-        # form.populate_obj(user)
+            user.is_active = user_form.is_active.data
         db.session.commit()
-        flash('个人资料已更新。', 'success')
+        flash('用户基本信息已更新。', 'success')
         return redirect(url_for('auth.profile', user_id=user.id))
-    return render_template('form.html', form=form, title='个人资料')
+
+    if 'profile_edit_submit' in request.form and profile_form.validate_on_submit():
+        profile_form.populate_obj(user.profile)
+        db.session.commit()
+        flash('用户详细资料已更新。', 'success')
+        return redirect(url_for('auth.profile', user_id=user.id))
+    return render_template('auth/profile.html', user_form=user_form, profile_form=profile_form, title='个人资料')
 
 
 

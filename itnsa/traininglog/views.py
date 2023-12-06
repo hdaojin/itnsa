@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from sqlalchemy import union_all
 
-from itnsa.traininglog.forms import TrainingLogUploadForm
-from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType
+from itnsa.traininglog.forms import TrainingLogUploadForm, TrainingLogEvaluationForm
+from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType, TrainingLogEvaluation
 from itnsa.traininglog import traininglog
 
 upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
@@ -88,7 +88,7 @@ def upload_training_log():
     else:
         print(form.errors)
     
-    return render_template('form.html', title='上传训练日志', form = form)
+    return render_template('traininglog/upload.html', title='上传训练日志', form = form)
 
 # 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
 @traininglog.route('/list/')
@@ -136,18 +136,25 @@ def list_training_logs(year=None, month=None, day=None):
 
     return render_template('traininglog/list.html', title=title, training_logs=training_logs, year=year, month=month, day=day)
 
-# view training log
+# view training log and evaluation
 @traininglog.route('/view/<path:filename>')
 def uploaded_file(filename):
     """ list all training logs"""
     return send_from_directory(upload_folder, filename)
 
-@traininglog.route('/view/<int:id>')
+@traininglog.route('/view/<int:id>', methods=['GET', 'POST'])
 @login_required
 def view_training_log(id):
     """ view training log"""
     training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
-    return render_template('traininglog/view.html', title='训练日志', training_log=training_log)
+    # evaluation = db.session.execute(db.select(TrainingLogEvaluation).where(TrainingLogEvaluation.training_log_id==id)).scalar_one_or_none()
+    form = TrainingLogEvaluationForm(obj=training_log.evaluation)
+    if form.validate_on_submit():
+        form.populate_obj(training_log.evaluation)
+        db.session.commit()
+        flash('评价成功', 'success')
+        return redirect(url_for('traininglog.view_training_log', id=id))
+    return render_template('traininglog/view.html', title='训练日志', training_log=training_log, form=form)
 
 
 # Delete training log from database and file system

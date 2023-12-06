@@ -12,7 +12,8 @@ def inject_admin_nav():
             {'name': '训练模块', 'url': url_for('admin.list_modules')},
             {'name': '添加训练模块', 'url': url_for('admin.add_training_module')},
             {'name': '用户列表', 'url': url_for('admin.users')},
-            {'name': '角色列表', 'url': url_for('admin.roles')}
+            {'name': '角色列表', 'url': url_for('admin.roles')},
+            {'name': '生成注册链接', 'url': url_for('admin.gen_reg_link')},
         ],
     }
     return dict(admin_nav=admin_nav)
