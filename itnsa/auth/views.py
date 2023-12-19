@@ -91,6 +91,12 @@ def get_roles():
 @login_required
 def profile(user_id):
     user = db.get_or_404(User, user_id)
+
+    # Check permissions: admin can edit all users, user can only edit his/her own profile
+    if not current_user.has_role('admin') and current_user.id != user.id:
+        flash('您没有权限访问该页面', 'danger')
+        return redirect(url_for('main.index'))
+
     if current_user.has_role('admin'):
         user_form = UserEditByAdminForm(obj=user)
         user_form.roles.choices = get_roles()

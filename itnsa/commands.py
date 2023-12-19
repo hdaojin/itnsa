@@ -1,9 +1,6 @@
 import click
 import sys
-
-from flask.cli import AppGroup
 from werkzeug.security import generate_password_hash
-
 from itnsa.models import db, User, UserProfile, Role, TrainingModule, TrainingType
 
 
@@ -82,27 +79,57 @@ traning_types = [
     }
 ]
 
-# Create a CLI group
-db_cli = AppGroup('database', help='Database operations.')
+# Replace with flask-migrate
+# # Create a CLI group
+# db_cli = AppGroup('database', help='Database operations.')
+# 
+# 
+# # Initialize the database
+# @db_cli.command('init')
+# def init_db():
+#     """Initialize the database."""
+#     db.create_all()
+#     click.echo('Initialized the database.')
+# 
+# # Drop the database
+# @db_cli.command('drop')
+# def drop_db():
+#     """Drop the database."""
+#     db.drop_all()
+#     click.echo('Dropped the database.')
 
 
-# Initialize the database
-@db_cli.command('init')
-def init_db():
-    """Initialize the database."""
-    db.create_all()
-    click.echo('Initialized the database.')
+# Add default training modules
+def add_default_training_modules():
+    """Add default training modules."""
+    modules = traning_modules
+    for module in modules:
+        module_exists = db.session.execute(db.select(TrainingModule).filter_by(name=module['name'])).scalar_one_or_none()
+        if module_exists:
+            click.echo(f"TrainingModule {module['name']} already exists.")
+            continue
+        module_obj = TrainingModule(**module)
+        db.session.add(module_obj)
+    db.session.commit()
+    click.echo('Inserted default training modules.')
 
-# Drop the database
-@db_cli.command('drop')
-def drop_db():
-    """Drop the database."""
-    db.drop_all()
-    click.echo('Dropped the database.')
 
-# Insert roles
-@db_cli.command('add-roles')
-def insert_roles():
+# Add default training types
+def add_default_training_types():
+    """Add default training types."""
+    types = traning_types
+    for type in types:
+        type_exists = db.session.execute(db.select(TrainingType).filter_by(name=type['name'])).scalar_one_or_none()
+        if type_exists:
+            click.echo(f"TrainingType {type['name']} already exists.")
+            continue
+        type_obj = TrainingType(**type)
+        db.session.add(type_obj)
+    db.session.commit()
+    click.echo('Inserted default training types.')
+
+# Add default roles
+def add_default_roles():
     """Add default roles."""
     roles = default_roles
     for role in roles:
@@ -115,11 +142,11 @@ def insert_roles():
     db.session.commit()
     click.echo('Inserted default roles.')
 
-# Add administator
-@db_cli.command('add-admin')
+# Add administrator
+@click.command('add-admin')
 @click.option('-u', '--username', prompt=True, hide_input=False, confirmation_prompt=False)
 @click.option('-p', '--password', prompt=True, hide_input=True, confirmation_prompt=True)
-def add_admin(username, password):
+def add_administrator(username, password):
     """Add an administrator."""
     admin_exists = db.session.execute(db.select(User).filter_by(username=username)).scalar_one_or_none()
     if admin_exists:
@@ -143,47 +170,14 @@ def add_admin(username, password):
         db.session.commit()
         click.echo(f"Administrator {username} added.")
 
-# Add training modules
-@db_cli.command('add-training-modules')
-def add_training_modules():
-    """Add default training modules."""
-    modules = traning_modules
-    for module in modules:
-        module_exists = db.session.execute(db.select(TrainingModule).filter_by(name=module['name'])).scalar_one_or_none()
-        if module_exists:
-            click.echo(f"TrainingModule {module['name']} already exists.")
-            continue
-        module_obj = TrainingModule(**module)
-        db.session.add(module_obj)
-    db.session.commit()
-    click.echo('Inserted default training modules.')
-
-
-# Add training types
-@db_cli.command('add-training-types')
-def add_training_types():
-    """Add default training types."""
-    types = traning_types
-    for type in types:
-        type_exists = db.session.execute(db.select(TrainingType).filter_by(name=type['name'])).scalar_one_or_none()
-        if type_exists:
-            click.echo(f"TrainingType {type['name']} already exists.")
-            continue
-        type_obj = TrainingType(**type)
-        db.session.add(type_obj)
-    db.session.commit()
-    click.echo('Inserted default training types.')
-
 
 # Complete the application initialization for a new installation
-@db_cli.command('init-app')
+@click.command('init-app')
 def init_app():
     """Complete the application initialization for a new installation."""
-    init_db()
-    insert_roles()
-    add_admin()
-    add_training_modules()
-    add_training_types()
+    add_default_training_types()
+    add_default_training_modules()
+    add_default_roles()
     click.echo('Initialized the application.')
 
 

@@ -21,6 +21,8 @@
     {id: "type", name: "集训类型" },
     {id: "file", name: "日志文件" },
     {id: "upload_date", name: "上传时间" },
+    {id: "completion_degree", name: "完成度(%)"},
+    {id: "evaluation", name: "教练评价"},
     {id: "operation", name: "操作" }
     ],
     data: [
@@ -35,7 +37,9 @@
     type: "{{ training_log.type.display_name | e }}",
     file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{ training_log.file | e }}</a>'),
     upload_date: "{{ training_log.uploaded_on | e }}",
-    operation: {% if training_log.user_id == current_user.id %}gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>'){% else %} "删除"{% endif %}
+    operation: {% if training_log.user_id == current_user.id %}gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>'){% else %} "删除"{% endif %},
+    completion_degree: {%if training_log.evaluation.score %}"{{ training_log.evaluation.score | e }}"{% else %}"未评价"{% endif %},
+    evaluation: {%if training_log.evaluation.comment %}"{{ training_log.evaluation.comment |summary(5)| e }}"{% else %}"未评价"{% endif %}
     },
     {% endfor %}
     ],

@@ -2,14 +2,58 @@
 {% if current_user.is_authenticated %}
 {% block content %}
 
+<!-- Display content of training log file -->
 <div>
-    <iframe src="{{ url_for('traininglog.uploaded_file', filename=training_log.date|format_date_Ym + '/' + training_log.file) }}" width="100%" height="960px">
+    <iframe
+        src="{{ url_for('traininglog.uploaded_file', filename=training_log.date|format_date_Ym + '/' + training_log.file) }}"
+        width="100%" height="960px">
         Your browser does not support display PDFs.
     </iframe>
 </div>
-<div>
+<!-- Display evaluation table -->
+{% if training_log.evaluation %}
+<div id="evaluation-display" class="row justify-content-center">
+    <div class="col col-lg-6">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th scope="row">完成度</th>
+                    <td>{{ training_log.evaluation.score }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">评价</th>
+                    <td>{{ training_log.evaluation.comment }}</td>
+                </tr>
+                <tr>
+                    <th scope="row">评价教练</th>
+                    <td>{{ training_log.evaluation.user.real_name }}</td>
+                </tr>
+            </tbody>
+        </table>
+        {% if current_user.has_role('coach') %}
+        <div class="d-flex justify-content-end">
+            <button type="button" id="edit-button" class="btn btn-outline-primary">修改</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Edit evaluation form -->
+<div id="evaluation-form" style="display: none;">
     {% include '_form.html' %}
 </div>
 
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.getElementById('edit-button').addEventListener('click', function () {
+        document.getElementById('evaluation-display').style.display = 'none';
+        document.getElementById('evaluation-form').style.display = 'block';
+    });
+</script>
+{% endblock script %}
+
 {% endif %}
+

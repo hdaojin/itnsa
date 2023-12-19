@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import Flask
 import config
 
-from itnsa.commands import db_cli
+from itnsa.commands import init_app, add_administrator
 
 
 def create_app():
@@ -39,12 +39,22 @@ def create_app():
     login_manager.login_message_category = 'info'
     
     # register commands
-    app.cli.add_command(db_cli)
+    app.cli.add_command(init_app)
+    app.cli.add_command(add_administrator)
 
     # Custom Jinja2 filters
+    # 创建一个自定义 Jinja2 过滤器，用于格式化日期
     @app.template_filter('format_date_Ym')
     def format_date_Ym(date):
         return date.strftime('%Y/%m')
+
+    # 创建一个自定义 Jinja2 过滤器，用于显示文本的摘要
+    @app.template_filter('summary')
+    def summary(text, length=50, suffix=' ......'):
+        if len(text) <= length:
+            return text
+        else:
+            return text[:length] + suffix
 
 
     with app.app_context():

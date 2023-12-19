@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 4bada20df431
+Revision ID: d3318a9859d5
 Revises: 
-Create Date: 2023-12-06 09:09:06.448346
+Create Date: 2023-12-15 11:54:34.697491
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4bada20df431'
+revision = 'd3318a9859d5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,6 +49,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=64), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
+    sa.Column('password_updated_on', sa.DateTime(), nullable=False),
     sa.Column('email', sa.String(length=256), nullable=True),
     sa.Column('real_name', sa.String(length=256), nullable=True),
     sa.Column('registered_on', sa.DateTime(), nullable=False),
@@ -74,12 +75,24 @@ def upgrade():
     )
     op.create_table('user_profile',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('student_id', sa.Integer(), nullable=True),
     sa.Column('gender', sa.String(length=64), nullable=True),
     sa.Column('id_card', sa.Integer(), nullable=True),
     sa.Column('birthday', sa.Date(), nullable=True),
-    sa.Column('join_date', sa.Date(), nullable=True),
     sa.Column('mobile', sa.Integer(), nullable=True),
     sa.Column('address', sa.String(length=512), nullable=True),
+    sa.Column('original_class', sa.String(length=128), nullable=True),
+    sa.Column('original_class_manager', sa.String(length=64), nullable=True),
+    sa.Column('original_class_manager_mobile', sa.Integer(), nullable=True),
+    sa.Column('dormitory', sa.String(length=128), nullable=True),
+    sa.Column('emergency_contact', sa.String(length=128), nullable=True),
+    sa.Column('emergency_contact_mobile', sa.Integer(), nullable=True),
+    sa.Column('join_date', sa.Date(), nullable=True),
+    sa.Column('class_student_id', sa.Integer(), nullable=True),
+    sa.Column('state', sa.String(length=64), nullable=True),
+    sa.Column('departure_date', sa.Date(), nullable=True),
+    sa.Column('competition_results', sa.String(), nullable=True),
+    sa.Column('honors', sa.String(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -93,8 +106,8 @@ def upgrade():
     )
     op.create_table('training_log_evaluation',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('Score', sa.Integer(), nullable=True),
-    sa.Column('Comment', sa.String(length=1024), nullable=True),
+    sa.Column('score', sa.Integer(), nullable=True),
+    sa.Column('comment', sa.String(length=1024), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('training_log_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['training_log_id'], ['training_log.id'], ),

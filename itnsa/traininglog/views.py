@@ -3,6 +3,7 @@ from flask import render_template, request, url_for, redirect, flash, send_from_
 
 from pathlib import Path
 from datetime import datetime, timedelta
+from functools import wraps
 
 from flask_login import login_required, current_user
 from sqlalchemy import union_all
@@ -29,6 +30,7 @@ def get_special_role_display_name():
         if role.name in ['coach', 'competitor']:
             return role.display_name
     return None
+
 
 @traininglog.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -71,7 +73,11 @@ def upload_training_log():
         )
         db.session.add(training_log)
         db.session.commit()
-        
+
+        # Create a training log evaluation instance
+        evaluation = TrainingLogEvaluation(training_log_id=training_log.id)
+        db.session.add(evaluation)
+        db.session.commit()
 
         # filename = secure_filename(file.filename)
         # current_month = datetime.now().strftime('%Y-%m')
@@ -146,14 +152,39 @@ def uploaded_file(filename):
 @login_required
 def view_training_log(id):
     """ view training log"""
-    training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
-    # evaluation = db.session.execute(db.select(TrainingLogEvaluation).where(TrainingLogEvaluation.training_log_id==id)).scalar_one_or_none()
-    form = TrainingLogEvaluationForm(obj=training_log.evaluation)
-    if form.validate_on_submit():
-        form.populate_obj(training_log.evaluation)
+    training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id == id)).scalar_one()
+    # Competitor can view his/her own training log and coach's training log;
+    # Coach can view his/her own training log and competitor's training log;
+    # Admin can view all training logs
+    if current_user.has_role('admin'):
+        pass
+    elif current_user.has_role('coach'):
+        if training_log.user_id != current_user.id and not any(role.name == 'competitor' for role in training_log.user.roles):
+            abort(403)
+    elif current_user.has_role('competitor'):
+        if training_log.user_id != current_user.id and not any(role.name == 'coach' for role in training_log.user.roles):
+            abort(403)
+    else:
+        abort(403)
+
+    form = TrainingLogEvaluationForm()
+
+    if form.validate_on_submit() and current_user.has_role('coach'):
+        if not training_log.evaluation:
+            training_log.evaluation = TrainingLogEvaluation()
+
+        training_log.evaluation.score = form.score.data
+        training_log.evaluation.comment = form.comment.data
+        training_log.evaluation.user_id = current_user.id
+        training_log.evaluation.training_log_id = id
         db.session.commit()
-        flash('评价成功', 'success')
+        flash('评价已更新', 'success')
         return redirect(url_for('traininglog.view_training_log', id=id))
+    
+    if training_log.evaluation:
+        form.score.data = training_log.evaluation.score
+        form.comment.data = training_log.evaluation.comment
+
     return render_template('traininglog/view.html', title='训练日志', training_log=training_log, form=form)
 
 
@@ -163,14 +194,15 @@ def view_training_log(id):
 @login_required
 def delete_training_log(id):
     """ delete training log"""
+    training_log = db.get_or_404(TrainingLog, id)
     # User can only delete his/her own training log except admin
     if not current_user.has_role('admin'):
-        training_log = db.session.execute(db.select(TrainingLog).where(TrainingLog.id==id)).scalar_one()
         if training_log.user_id != current_user.id:
             abort(403)
 
     taining_log_path = upload_folder.joinpath(training_log.date.strftime('%Y'), training_log.date.strftime('%m'), training_log.file)
-    taining_log_path.unlink()
+    if taining_log_path.exists():
+        taining_log_path.unlink()
     db.session.delete(training_log)
     db.session.commit()
     flash('删除成功', 'success')
