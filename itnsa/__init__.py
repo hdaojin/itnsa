@@ -1,8 +1,7 @@
 from pathlib import Path
-
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 import config
-
 from itnsa.commands import init_app, add_administrator
 
 
@@ -20,6 +19,9 @@ def create_app():
         Path(app.instance_path).mkdir(parents=True)
     except FileExistsError:
         pass
+
+    # Tell Flask it is behind a proxy
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_proto=1, x_prefix=1)
 
     # register extensions
     # register flask-sqlalchemy
