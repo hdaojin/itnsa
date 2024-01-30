@@ -1,7 +1,7 @@
 from pathlib import Path
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
-import config
+from config import app_config
 from itnsa.commands import init_app, add_administrator
 
 
@@ -9,11 +9,7 @@ def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
-    # if production_config.py exists, load it, otherwise load default config
-    # if Path(app.instance_path).joinpath('production_config.py').exists():
-    # app.config.from_object('config.DevelopmentConfig')
-    app.config.from_object(config)
-    app.config.from_pyfile('production_config.py', silent=True)
+    app.config.from_object(app_config)
  
     try:
         Path(app.instance_path).mkdir(parents=True)
