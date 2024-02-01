@@ -12,6 +12,9 @@ from itnsa.note import note
 # define nessary variables
 note_folder = Path(current_app.config['NOTE_FOLDER'])
 
+# Create note_folder if it doesn't exist
+note_folder.mkdir(parents=True, exist_ok=True)
+
 markdown2_extras = [
     "metadata",
     "tables",
