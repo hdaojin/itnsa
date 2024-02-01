@@ -24,14 +24,13 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     """Production config class."""
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'your_default_secret_key')
-    SQLALCHEMY_DATABASE_URI = 'mariadb+pymysql://' + os.environ.get('DB_USER') + ':' + os.environ.get('DB_PASSWORD') + '@' + os.environ.get('DB_HOST') + '/' + os.environ.get('DB') + '?charset=utf8mb4'
+    SQLALCHEMY_DATABASE_URI = 'mariadb+pymysql://' + str(os.getenv('DB_USER')) + ':' + str(os.getenv('DB_PASSWORD')) + '@' + str(os.getenv('DB_HOST')) + '/' + str(os.getenv('DB')) + '?charset=utf8mb4'
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
 
 class TestingConfig(Config):
     """Testing config class."""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'your_default_secret_key')
-    SQLALCHEMY_DATABASE_URI = 'mariadb+pymysql://' + os.environ.get('DB_USER') + ':' + os.environ.get('DB_PASSWORD') + '@' + os.environ.get('DB_HOST') + '/' + os.environ.get('DB') + '?charset=utf8mb4'
+    SQLALCHEMY_DATABASE_URI = 'mariadb+pymysql://' + str(os.getenv('DB_USER')) + ':' + str(os.getenv('DB_PASSWORD')) + '@' + str(os.getenv('DB_HOST')) + '/' + str(os.getenv('DB')) + '?charset=utf8mb4'
 
 env = os.environ.get('FLASK_ENV', 'development')
 if env == 'production':
