@@ -17,6 +17,7 @@
             { id: "email", name: "邮箱" },
             { id: "registered_on", name: "注册时间"},
             { id: "is_active", name: "激活" },
+            { id: "delete", name: "删除" },
         ],
         data: [
             {% for user in users %}
@@ -28,7 +29,8 @@
             role: "{% for role in user.roles %}{{ role.display_name }}{% if not loop.last %}, {% endif %}{% endfor %}",
             email: "{{ user.email|e }}",
             registered_on: "{{ user.registered_on }}",
-            is_active: {% if user.is_active %}"是"{% else %}"否"{% endif %}
+            is_active: {% if user.is_active %}"是"{% else %}"否"{% endif %},
+            delete: gridjs.html('<a class="text-decoration-none" href="{{ url_for('admin.delete_user', id=user.id) }}">删除</a>'),
             },
             {% endfor %}
         ],

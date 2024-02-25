@@ -1,4 +1,4 @@
-from flask import render_template, abort
+from flask import render_template, abort, redirect, url_for
 from flask_login import login_required, current_user
 
 from itnsa.models import db, User, Role
@@ -16,6 +16,18 @@ def users():
         users = db.session.execute(db.select(User).order_by(User.id)).scalars()
         return render_template('admin/auth/users.html', users=users, title='用户列表')
     return abort(403)
+
+# Delete user
+@admin.route('/delete-user/<int:id>')
+@login_required
+@admin_required
+def delete_user(id):
+    user = db.session.execute(db.select(User).where(User.id == id)).scalar_one_or_none()
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('admin.users'))
+    return abort(404)
 
 # Roles list view
 @admin.route('/roles')
