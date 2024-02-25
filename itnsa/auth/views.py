@@ -39,8 +39,12 @@ def register():
             real_name=form.real_name.data,
             email=form.email.data,
         )
+        user = db.session.execute(db.select(User).filter_by(username=form.username.data)).scalar_one_or_none()
+        if user:
+            flash('用户名已存在。', 'danger')
+            return redirect(url_for('auth.register'))
+        
         role = db.session.execute(db.select(Role).filter_by(name=form.roles.data)).scalar_one_or_none()
-        print(role)
         if role:
             user.roles.append(role)
         else:
@@ -129,8 +133,3 @@ def profile(user_id):
         flash('用户详细资料已更新。', 'success')
         return redirect(url_for('auth.profile', user_id=user.id))
     return render_template('auth/profile.html', user_form=user_form, profile_form=profile_form, title='个人资料')
-
-
-
-
-
