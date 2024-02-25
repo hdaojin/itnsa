@@ -40,7 +40,8 @@ def upload_training_log():
     form.module.choices = get_training_modules()
     form.type.choices = get_training_types()
     if request.method == 'GET':
-        form.type.default = 'WorldSkillsItnsaEliteClass'
+        #form.type.default = 'WorldSkillsItnsaEliteClass'
+        form.type.default = 'WorldSkillsItnsaChinaTeam'
         form.process()
 
     if form.validate_on_submit():
