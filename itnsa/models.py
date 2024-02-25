@@ -30,7 +30,7 @@ user_role = db.Table(
 class User(db.Model, UserMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String(65535), nullable=False)
+    password: Mapped[str] = mapped_column(String(4096), nullable=False)
     password_updated_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=True)
     real_name: Mapped[str] = mapped_column(String(256), nullable=True)

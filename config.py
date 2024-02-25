@@ -14,8 +14,8 @@ class Config(object):
     NOTE_FOLDER = Path(__file__).parent.joinpath('instance', 'markdown_notes')
     # Set the path of training log upload folder
     UPLOAD_FOLDER = Path(__file__).parent.joinpath('instance', 'uploads', 'training_logs')
-    MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1MB
-    ALLOWED_EXTENSIONS = {'pdf'}
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 1MB
+    ALLOWED_EXTENSIONS = ['pdf','doc','docx','zip','rar','7z']
 
 class DevelopmentConfig(Config):
     """Development config class."""
