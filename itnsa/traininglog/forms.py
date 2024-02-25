@@ -8,7 +8,7 @@ from config import app_config
 class TrainingLogUploadForm(FlaskForm):
     module = SelectField('模块', validators=[DataRequired()]) # Dynamic choices in view function
     date = DateField('日期', validators=[DataRequired()], default=datetime.today(), description="请选择日志对应的训练日期，不是日志上传的日期")
-    task = StringField('任务', validators=[DataRequired(), Length(max=20, message='任务长度不能超过20个字符')])
+    task = StringField('任务', validators=[DataRequired(), Length(max=30, message='任务长度不能超过30个字符')])
     type = RadioField('类型', validators=[DataRequired()]) # Dynamic choices in view function
     file = FileField('上传文件', validators=[FileRequired(), 
                                         FileAllowed(app_config.ALLOWED_EXTENSIONS, f'只能上传{app_config.ALLOWED_EXTENSIONS}文件'),
