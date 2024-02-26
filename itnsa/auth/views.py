@@ -2,6 +2,8 @@ from flask import  render_template, url_for, redirect, request, flash, current_a
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import re
+
 from itnsa.models import db, User, Role, UserProfile
 from itnsa.common.views import validate_registration_link
 
@@ -30,20 +32,27 @@ def register():
 
     form = RegisterForm()
     form.roles.choices = get_common_roles()
-    # form.roles.default = 'competitor'
-    # form.process()
+    if request.method == 'GET':
+        form.roles.default = 'competitor'
+        form.process()
+        
     if form.validate_on_submit():
+        username = form.username.data
+        if not re.match(r'^[a-zA-Z0-9_-]{3,120}$', username):
+            flash('用户名只能包含字母、数字、短横杠和下划线。', 'danger')
+            return redirect(url_for('auth.register'))
+        
+        user = db.session.execute(db.select(User).filter_by(username=form.username.data)).scalar_one_or_none()
+        if user:
+            flash('用户名已存在。', 'danger')
+            return redirect(url_for('auth.register'))
+        
         user = User(
             username=form.username.data,
             password=generate_password_hash(form.password.data),
             real_name=form.real_name.data,
             email=form.email.data,
         )
-        user = db.session.execute(db.select(User).filter_by(username=form.username.data)).scalar_one_or_none()
-        if user:
-            flash('用户名已存在。', 'danger')
-            return redirect(url_for('auth.register'))
-        
         role = db.session.execute(db.select(Role).filter_by(name=form.roles.data)).scalar_one_or_none()
         if role:
             user.roles.append(role)

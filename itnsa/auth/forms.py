@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=120)],
+    username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=120)], description="用户名长度不能少于3个字符, 且只能包含字母、数字、短横杠和下划线",
                            render_kw={'placeholder': '用于登录的用户名'})
     password = PasswordField('密码', validators=[DataRequired(), Length(min=8, max=512),
                                                EqualTo('confirm', message='两次输入的密码不一致')],
