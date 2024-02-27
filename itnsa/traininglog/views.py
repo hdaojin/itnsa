@@ -129,7 +129,7 @@ def list_training_logs(year=None, month=None, day=None):
         competitors_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='competitor')).scalars().all()
         # If current user if a coach who can view all training logs of competitors and himself
         if current_user.has_role('coach') and not current_user.has_role('admin'):
-            # allowed_ids = [current_user.id] + competitors_ids
+            allowed_ids = [current_user.id] + competitors_ids
         # If current user if a coach who can view all training logs of competitors, cocach
             allowed_ids = competitors_ids + coaches_ids
         # If current user if a competitor who can view all training logs of coaches and himself
@@ -162,8 +162,9 @@ def view_training_log(id):
     if current_user.has_role('admin'):
         pass
     elif current_user.has_role('coach'):
-        if training_log.user_id != current_user.id and not any(role.name == 'competitor' for role in training_log.user.roles):
-            abort(403)
+        # if training_log.user_id != current_user.id and not any(role.name == 'competitor' for role in training_log.user.roles):
+            # abort(403)
+        pass
     elif current_user.has_role('competitor'):
         if training_log.user_id != current_user.id and not any(role.name == 'coach' for role in training_log.user.roles):
             abort(403)
