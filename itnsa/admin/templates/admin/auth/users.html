@@ -24,7 +24,7 @@
             {
             id: "{{ user.id }}",
             //username: "{{ user.username|e }}",
-            username: gridjs.html('<a class="text-decoration-none" href="{{ url_for('auth.profile', user_id=user.id) }}">{{ user.username|e }}</a>'),
+            username: gridjs.html('<a class="text-decoration-none" href="{{ url_for('admin.profile', user_id=user.id) }}">{{ user.username|e }}</a>'),
             real_name: "{{ user.real_name|e }}",
             role: "{% for role in user.roles %}{{ role.display_name }}{% if not loop.last %}, {% endif %}{% endfor %}",
             email: "{{ user.email|e }}",

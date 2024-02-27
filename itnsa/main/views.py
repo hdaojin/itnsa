@@ -20,7 +20,7 @@ def inject_nav():
     if current_user.is_authenticated:
         user_nav = {
             'user_logged_in' : [
-                {'name': '个人资料', 'url': url_for('auth.profile', user_id=current_user.id)},
+                {'name': '个人资料', 'url': url_for('admin.profile', user_id=current_user.id)},
                 {'name': '注销', 'url': url_for('auth.logout')}
             ],
             'training_log': [

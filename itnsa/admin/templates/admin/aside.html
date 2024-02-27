@@ -3,7 +3,7 @@
   <a href="/" class="text-white text-decoration-none"><span class="fs-2">ITNSA</span></a>
   <hr>
   <ul class="nav nav-pills flex-column mb-auto">
-    {% for item in admin_nav.main %}
+    {% for item in main_nav %}
     <li class="nav-item">
       {% if item.url == request.path %}
       <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>

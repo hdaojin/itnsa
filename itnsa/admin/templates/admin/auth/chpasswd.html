@@ -1,6 +1,6 @@
-{% extends 'admin/base.html' %}
-
+{% extends "admin/base.html" %}
 {% block content %}
+{% if current_user.is_authenticated %}
 <div class="row">
     <div class="col-md-6 offset-md-3">
         {% from "_formhelpers.html" import render_field, render_field_label %}
@@ -43,4 +43,5 @@
         </form>
     </div>
 </div>
-{% endblock content %}
+{% endif %}
+{% endblock %}

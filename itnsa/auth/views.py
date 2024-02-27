@@ -7,7 +7,7 @@ import re
 from itnsa.models import db, User, Role, UserProfile
 from itnsa.common.views import validate_registration_link
 
-from .forms import LoginForm, RegisterForm, UserEditByAdminForm, UserEditByUserForm, ProfileEditForm
+from .forms import LoginForm, RegisterForm
 from . import auth, login_manager
 
 
@@ -95,50 +95,4 @@ def logout():
     flash('注销成功。', 'success')
     return redirect(url_for('auth.login'))
 
-# User profile view and edit view
-def get_roles():
-    roles = db.session.execute(db.select(Role).order_by(Role.id)).scalars().all()
-    return [(role.name, role.display_name) for role in roles]
 
-@auth.route('/user/profile/<user_id>', methods=['GET', 'POST'])
-@login_required
-def profile(user_id):
-    user = db.get_or_404(User, user_id)
-
-    # Check permissions: admin can edit all users, user can only edit his/her own profile
-    if not current_user.has_role('admin') and current_user.id != user.id:
-        flash('您没有权限访问该页面', 'danger')
-        return redirect(url_for('main.index'))
-
-    if current_user.has_role('admin'):
-        user_form = UserEditByAdminForm(obj=user)
-        user_form.roles.choices = get_roles()
-        if request.method == 'GET':
-            user_form.roles.data = [role.name for role in user.roles]
-    else:
-        user_form = UserEditByUserForm(obj=user)
-        user_form.roles.choices = [(role.name, role.display_name) for role in user.roles]
-        if request.method == 'GET':
-            user_form.roles.data = [role.name for role in user.roles]
-
-    profile_form = ProfileEditForm(obj=user.profile)
-
-    if 'user_edit_submit' in request.form and user_form.validate_on_submit():
-        user.email = user_form.email.data
-        if current_user.has_role('admin'):
-            user.username = user_form.username.data
-            user.real_name = user_form.real_name.data
-            selected_roles = user_form.roles.data
-            new_roles = db.session.execute(db.select(Role).filter(Role.name.in_(selected_roles))).scalars().all()
-            user.roles = new_roles
-            user.is_active = user_form.is_active.data
-        db.session.commit()
-        flash('用户基本信息已更新。', 'success')
-        return redirect(url_for('auth.profile', user_id=user.id))
-
-    if 'profile_edit_submit' in request.form and profile_form.validate_on_submit():
-        profile_form.populate_obj(user.profile)
-        db.session.commit()
-        flash('用户详细资料已更新。', 'success')
-        return redirect(url_for('auth.profile', user_id=user.id))
-    return render_template('auth/profile.html', user_form=user_form, profile_form=profile_form, title='个人资料')
