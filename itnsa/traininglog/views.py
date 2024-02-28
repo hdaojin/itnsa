@@ -4,9 +4,10 @@ from flask import render_template, request, url_for, redirect, flash, send_from_
 from pathlib import Path
 from datetime import datetime, timedelta
 from functools import wraps
+import calendar
 
 from flask_login import login_required, current_user
-from sqlalchemy import union_all
+from sqlalchemy import union_all, desc
 
 from itnsa.traininglog.forms import TrainingLogUploadForm, TrainingLogEvaluationForm
 from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType, TrainingLogEvaluation
@@ -31,6 +32,22 @@ def get_special_role_display_name():
             return role.display_name
     return None
 
+def get_unique_roles_display_name():
+    # 返回所有角色的display_name, 除了'admin'角色
+    roles = db.session.execute(db.select(Role).where(Role.name != 'admin').order_by(Role.id)).scalars().all()
+    #return set([role.display_name for role in roles])
+    return [role.display_name for role in roles]
+
+def get_unique_users_display_name():
+    # 返回所有用户的display_name
+    users = db.session.execute(db.select(User).order_by(User.id)).scalars().all()
+    # return set([user.real_name for user in users])
+    return [user.real_name for user in users]
+
+def get_month_calendar(year, month):
+    # 返回指定月的日历
+    cal = calendar.monthcalendar(year, month)
+    return cal
 
 @traininglog.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -98,31 +115,52 @@ def upload_training_log():
     return render_template('traininglog/upload.html', title='上传训练日志', form = form)
 
 # 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
-@traininglog.route('/list/')
 @traininglog.route('/list/<int:year>/<int:month>/')
-@traininglog.route('/list/<int:year>/<int:month>/<int:day>/')
 @login_required
-def list_training_logs(year=None, month=None, day=None):
-    if not year or not month:
-        year = datetime.now().year
-        month = datetime.now().month
+def list_training_logs(year, month):
+    # get all unique roles, users, and month calendar
+    unique_roles = get_unique_roles_display_name()
+    unique_users = get_unique_users_display_name()
+
+    cal = get_month_calendar(year, month)
+
+
+    # 接收浏览器传递的参数
+    name = request.args.get('name')
+    role = request.args.get('role')
+    date = datetime.strptime(request.args.get('date'), '%Y-%m-%d').date() if request.args.get('date') else None
+
+    # Get current month
+    now = datetime.now()
+    current_month = {'year': now.year, 'month': now.month}
+    today = now.day
+
+    # Get last month
+    if month == 1:
+        last_month = {'year': year - 1, 'month': 12}
+    else:
+        last_month = {'year': year, 'month': month - 1}
 
     # get a month
     start_date = datetime(year, month, 1)
     end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
 
-    # if day is specified, get a day
-    if day:
-        start_date = datetime(year, month, day)
-        end_date = start_date + timedelta(days=1)
-
     # select logics
     
     query = db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date)
 
+    # Date filter using request args(role, name, date)
+    if role:
+        query = query.where(TrainingLog.user.has(User.roles.any(Role.display_name == role)))
+    if name:
+        query = query.where(TrainingLog.user.has(User.real_name == name))
+    if date:
+        query = query.where(TrainingLog.date == date)
+
+
     # Display all training logs if user is admin
     if current_user.has_role('admin'):
-        training_logs = db.session.execute(query.order_by(TrainingLog.date)).scalars()
+        training_logs = db.session.execute(query.order_by(desc(TrainingLog.date))).scalars()
     else:
         # Get IDs of all coaches and competitors
         coaches_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='coach')).scalars().all()
@@ -138,12 +176,13 @@ def list_training_logs(year=None, month=None, day=None):
         else:
             allowed_ids = [current_user.id]
         
-        training_logs = db.session.execute(query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(TrainingLog.date)).scalars()
+        training_logs = db.session.execute(query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(desc(TrainingLog.date))).scalars()
+
 
     end_date = end_date - timedelta(days=1)
     title = f"{start_date.strftime('%Y.%m.%d')} - {end_date.strftime('%Y.%m.%d')} 训练日志列表"
 
-    return render_template('traininglog/list.html', title=title, training_logs=training_logs, year=year, month=month, day=day)
+    return render_template('traininglog/list.html', title=title, training_logs=training_logs, year=year, month=month, last_month=last_month, current_month=current_month, cal=cal, today=today, unique_roles=unique_roles, unique_users=unique_users)
 
 # view training log and evaluation
 @traininglog.route('/view/<path:filename>')
@@ -188,6 +227,7 @@ def view_training_log(id):
     if training_log.evaluation:
         form.score.data = training_log.evaluation.score
         form.comment.data = training_log.evaluation.comment
+
 
     return render_template('traininglog/view.html', title='训练日志', training_log=training_log, form=form)
 

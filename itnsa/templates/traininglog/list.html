@@ -3,67 +3,134 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
+<div  class="py-3" style="display: grid; grid-template-columns:80% 20%; gap:20px">
+    <div class="rounded border">
+        <table id="training-logs" class="table table-hover text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>角色</th>
+                    <th>训练日期</th>
+                    <th>训练模块</th>
+                    <th>训练任务</th>
+                    <th>集训类型</th>
+                    <th>日志文件</th>
+                    <th>上传时间</th>
+                    <th>完成度(%)</th>
+                    <th>教练评价</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for training_log in training_logs %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ training_log.user.real_name }}</td>
+                    <td>
+                        {% for role in training_log.user.roles %}
+                        {%if role.name in ['coach', 'competitor']%}
+                        {{ role.display_name }}{% if not loop.last %}, {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ training_log.date }}</td>
+                    <td>{{ training_log.module.display_name }}</td>
+                    <td>{{ training_log.task }}</td>
+                    <td>{{ training_log.type.display_name }}</td>
+                    <td><a href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
+                            training_log.file
+                            }}</a>
+                    </td>
+                    <td>{{ training_log.uploaded_on }}</td>
+                    <td>
+                        {% if training_log.evaluation.score %}
+                        {{ training_log.evaluation.score }}
+                        {% else %}
+                        未评价
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if training_log.evaluation.comment %}
+                        {{ training_log.evaluation.comment | summary(5) }}
+                        {% else %}
+                        未评价
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if training_log.user_id == current_user.id %}
+                        <a href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
+                        {% else %}
+                        删除
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<div id="training_logs-table"></div>
+    <div id="filterOptions" class="mb-3">
+        <!-- 筛选姓名 -->
+        <div>筛选姓名：
+            <a href="">全部</a>
+            {% for name in unique_users %}
+            <a href="?name={{ name }}">{{ name }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- 筛选角色 -->
+        <div class="mt-3">筛选角色：
+            <a href="">全部</a>
+            {% for role in unique_roles %}
+            <a href="?role={{ role }}">{{ role }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- 筛选日期 -->
+        <div class="mt-3">筛选日期：
+            <a href="">{{ year }}年{{ month }}月</a>
+            <table class="ms-5 table text-center" style="width: auto; margin: auto;">
+                <thead>
+                    <tr>
+                        <th>一</th>
+                        <th>二</th>
+                        <th>三</th>
+                        <th>四</th>
+                        <th>五</th>
+                        <th>六</th>
+                        <th>日</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in cal %}
+                    <tr>
+                        {% for day in week %}
+                        <td>
+                            {% if day %}
+                            {% if day == today and year == current_month.year and month == current_month.month %}
+                            <a href="?date={{ year }}-{{ month }}-{{ day }}" class="text-warning">今天</a>
+                            {% else %}
+                            <a href="?date={{ year }}-{{ month }}-{{ day }}">{{ day }}</a>
+                            {% endif %}
+                            {% else %}
+                            <span>&nbsp;</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+            </table>
+        </div>
+        <!--上个月-->
+        <div class="mt-3">
+            上一个月：
+            <a href="{{ url_for('traininglog.list_training_logs', year=last_month.year, month=last_month.month) }}">{{ last_month.year }}年{{ last_month.month }}月</a>
+        </div>
+
+    </div>
+</div>
 
 {% endblock content %}
-
-{% block script %}
-<script>
-    new gridjs.Grid({
-        columns: [
-    {id: "id", name: "序号" },
-    {id: "name", name: "姓名" },
-    {id: "role", name: "角色" },
-    {id: "date", name: "训练日期" },
-    {id: "module", name: "训练模块" },
-    {id: "task", name: "训练任务" },
-    {id: "type", name: "集训类型" },
-    {id: "file", name: "日志文件" },
-    {id: "upload_date", name: "上传时间" },
-    {id: "completion_degree", name: "完成度(%)"},
-    {id: "evaluation", name: "教练评价"},
-    {id: "operation", name: "操作" }
-    ],
-    data: [
-    {% for training_log in training_logs %}
-    {
-    id: "{{ loop.index }}",
-    name: "{{ training_log.user.real_name | e }}",
-    role: "{% for role in training_log.user.roles %}{{ role.display_name|e }}{% if not loop.last %}, {% endif %}{% endfor %}",
-    date: "{{ training_log.date | e }}",
-    module: "{{ training_log.module.display_name | e }}",
-    task: "{{ training_log.task | e }}",
-    type: "{{ training_log.type.display_name | e }}",
-    file: gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{ training_log.file | e }}</a>'),
-    upload_date: "{{ training_log.uploaded_on | e }}",
-    operation: {% if training_log.user_id == current_user.id %}gridjs.html('<a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>'){% else %} "删除"{% endif %},
-    completion_degree: {%if training_log.evaluation.score %}"{{ training_log.evaluation.score | e }}"{% else %}"未评价"{% endif %},
-    evaluation: {%if training_log.evaluation.comment %}"{{ training_log.evaluation.comment |summary(5)| e }}"{% else %}"未评价"{% endif %}
-    },
-    {% endfor %}
-    ],
-    search: true,
-    sort: true,
-    pagination: true,
-    language: {
-    search: {
-    placeholder: "搜索...",
-    },
-    pagination: {
-    previous: "上一页",
-    next: "下一页",
-    showing: "显示",
-    results: () => "行",
-    },
-    },
-    className: {
-    table: 'table table-hover',
-    thead: 'table-dark',
-    a: 'text-decoration-none'
-    }
-}).render(document.getElementById("training_logs-table"));
-</script>
-{% endblock script %}
 
 {% endif %}

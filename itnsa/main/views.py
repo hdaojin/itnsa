@@ -1,6 +1,8 @@
 from flask import  render_template, url_for, current_app
 from flask_login import current_user
 
+from datetime import datetime
+
 from . import main
 
 # 注册上下文处理器，使得变量在所有模板中全局可访问. 该函数返回应用菜单的字典
@@ -25,7 +27,7 @@ def inject_nav():
             ],
             'training_log': [
                 {'name': '上传日志', 'url': url_for('traininglog.upload_training_log')},
-                {'name': '日志列表', 'url': url_for('traininglog.list_training_logs')}
+                {'name': '日志列表', 'url': url_for('traininglog.list_training_logs', year=datetime.now().year, month=datetime.now().month)}
             ],
             'note': [
                 {'name': '教学笔记', 'url': url_for('note.list_note_folders')}
