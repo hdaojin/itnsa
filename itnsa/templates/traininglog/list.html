@@ -5,7 +5,7 @@
 {% block content %}
 <div  class="py-3" style="display: grid; grid-template-columns:300px auto; gap:12px">
 
-    <div class="rounded border p-3">
+    <div class="rounded border border-secondary p-3">
         <!-- 筛选姓名 -->
         <div>
             <p>筛选姓名：<a href="?name=">全部</a></p>
@@ -70,7 +70,7 @@
 
     </div>
 
-    <div class="table-responsive rounded border p-3">
+    <div class="table-responsive rounded border border-secondary p-3">
         <table id="training-logs" class="table table-hover">
             <thead class="table-light text-nowrap text-center">
                 <tr>
@@ -87,7 +87,7 @@
                     <th>操作</th>
                 </tr>
             </thead>
-            <tbody class="text-nowrap">
+            <tbody class="text-nowrap table-group-divider">
                 {% for training_log in training_logs %}
                 <tr>
                     <td class="text-center">{{ loop.index }}</td>
