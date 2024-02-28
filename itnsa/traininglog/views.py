@@ -108,7 +108,7 @@ def upload_training_log():
 
         file.save(upload_folder_path.joinpath(filename))
         flash('上传成功', 'success')
-        return redirect(url_for('traininglog.list_training_logs'))
+        return redirect(url_for('traininglog.list_training_logs', year=date.year, month=date.month))
     else:
         print(form.errors)
     
@@ -117,7 +117,7 @@ def upload_training_log():
 # 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
 @traininglog.route('/list/<int:year>/<int:month>/')
 @login_required
-def list_training_logs(year, month):
+def list_training_logs(year=None, month=None):
     # get all unique roles, users, and month calendar
     unique_roles = get_unique_roles_display_name()
     unique_users = get_unique_users_display_name()
@@ -130,12 +130,17 @@ def list_training_logs(year, month):
     role = request.args.get('role')
     date = datetime.strptime(request.args.get('date'), '%Y-%m-%d').date() if request.args.get('date') else None
 
-    # Get current month
+    # Get current year and month
     now = datetime.now()
     current_month = {'year': now.year, 'month': now.month}
     today = now.day
 
-    # Get last month
+    if not year:
+        year = now.year
+    if not month:
+        month = now.month
+
+    # Get last  month
     if month == 1:
         last_month = {'year': year - 1, 'month': 12}
     else:
@@ -250,4 +255,4 @@ def delete_training_log(id):
     db.session.delete(training_log)
     db.session.commit()
     flash('删除成功', 'success')
-    return redirect(url_for('traininglog.list_training_logs'))
+    return redirect(url_for('traininglog.list_training_logs', year=training_log.date.year, month=training_log.date.month))
