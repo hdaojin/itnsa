@@ -26,13 +26,16 @@ class BaseView:
 
 
 # 通过加密令牌生成注册链接
+# 生成的链接有效期为12小时
+link_age = 43200
+
 def generate_registration_link():
     serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     token = serializer.dumps('register', salt=current_app.config['SECRET_SALT'])
     link = url_for('auth.register', token=token, _external=True)
-    return link
+    return link, link_age
 
-def validate_registration_link(token, max_age=3600):
+def validate_registration_link(token, max_age=link_age):
     serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     try:
         data = serializer.loads(token, salt=current_app.config['SECRET_SALT'], max_age=max_age)

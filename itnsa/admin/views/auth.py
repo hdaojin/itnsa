@@ -129,6 +129,6 @@ def roles():
 @login_required
 @admin_required
 def gen_reg_link():
-    link = generate_registration_link()
-    return render_template('admin/auth/gen-reg-link.html', link=link, title='生成注册链接')
+    link, link_age = generate_registration_link()
+    return render_template('admin/auth/gen-reg-link.html', link=link, link_age=link_age, title='生成注册链接')
 
