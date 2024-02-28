@@ -3,7 +3,7 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
-<div  class="py-3" style="display: grid; grid-template-columns:80% 20%; gap:20px">
+<div  class="py-3" style="display: grid; grid-template-columns:auto 240px; gap:20px">
     <div class="rounded border">
         <table id="training-logs" class="table table-hover text-center">
             <thead class="table-light">
@@ -70,7 +70,7 @@
         </table>
     </div>
 
-    <div id="filterOptions" class="mb-3">
+    <div>
         <!-- 筛选姓名 -->
         <div>筛选姓名：
             <a href="">全部</a>
@@ -90,7 +90,7 @@
         <!-- 筛选日期 -->
         <div class="mt-3">筛选日期：
             <a href="">{{ year }}年{{ month }}月</a>
-            <table class="ms-5 table text-center" style="width: auto; margin: auto;">
+            <table class="table text-center" style="width: auto; margin: auto;">
                 <thead>
                     <tr>
                         <th>一</th>
