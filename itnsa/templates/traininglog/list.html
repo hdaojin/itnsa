@@ -7,24 +7,29 @@
 
     <div class="rounded border p-3">
         <!-- 筛选姓名 -->
-        <div>筛选姓名：
-            <a href="">全部</a>
-            {% for name in unique_users %}
-            <a class="text-decoration-none" href="?name={{ name }}">{{ name }}</a>
-            {% endfor %}
+        <div>
+            <p>筛选姓名：<a href="?name=">全部</a></p>
+            <p>
+                {% for name in unique_users %}
+                    <a class="text-decoration-none" href="?name={{ name }}">{{ name }}</a>
+                {% endfor %}
+            </p>
         </div>
 
         <!-- 筛选角色 -->
-        <div class="mt-3">筛选角色：
-            <a href="">全部</a>
-            {% for role in unique_roles %}
-            <a href="?role={{ role }}">{{ role }}</a>
-            {% endfor %}
+        <div class="mt-3">
+            <p>筛选角色：<a href="?role=">全部</a></p>
+            <p>
+                {% for role in unique_roles %}
+                    <a href="?role={{ role }}">{{ role }}</a>
+                {% endfor %}
+            </p>
         </div>
 
         <!-- 筛选日期 -->
-        <div class="mt-3">筛选日期：
-            <a href="">{{ year }}年{{ month }}月</a>
+        <div class="mt-3">
+            <p>筛选日期：<a href="?date=">{{ year }}年{{ month }}月</a></p>
+            
             <table class="table text-center" style="width: auto; margin: auto;">
                 <thead>
                     <tr>
@@ -66,8 +71,8 @@
     </div>
 
     <div class="table-responsive rounded border p-3">
-        <table id="training-logs" class="table table-hover text-center">
-            <thead class="table-light text-nowrap">
+        <table id="training-logs" class="table table-hover">
+            <thead class="table-light text-nowrap text-center">
                 <tr>
                     <th>序号</th>
                     <th>姓名</th>
@@ -85,7 +90,7 @@
             <tbody class="text-nowrap">
                 {% for training_log in training_logs %}
                 <tr>
-                    <td>{{ loop.index }}</td>
+                    <td class="text-center">{{ loop.index }}</td>
                     <td>{{ training_log.user.real_name }}</td>
                     <td>
                         {% for role in training_log.user.roles %}
@@ -96,9 +101,9 @@
                     </td>
                     <td>{{ training_log.date }}</td>
                     <td>{{ training_log.module.display_name }}</td>
-                    <td>{{ training_log.task | summary(10) }}</td>
+                    <td>{{ training_log.task | summary(20) }}</td>
                     <td><a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
-                            training_log.file | summary_middle(40)
+                            training_log.file | summary_middle(65)
                             }}</a>
                     </td>
                     <td>{{ training_log.uploaded_on }}</td>
