@@ -6,7 +6,12 @@
 {{ field(**kwargs)|safe }}
 
 {% if field.description %}
+<!--红色字提醒特别注意要选择训练日志的日期-->
+{% if field.name == "date" %}
+<div class="form-text text-danger">
+{% else %}
 <div class="form-text">
+{% endif %}
     {{ field.description }}
 </div>
 {% endif %}
