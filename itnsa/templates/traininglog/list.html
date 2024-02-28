@@ -3,79 +3,14 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
-<div  class="py-3" style="display: grid; grid-template-columns:auto 240px; gap:20px">
-    <div class="rounded border">
-        <table id="training-logs" class="table table-hover text-center">
-            <thead class="table-light">
-                <tr>
-                    <th>序号</th>
-                    <th>姓名</th>
-                    <th>角色</th>
-                    <th>训练日期</th>
-                    <th>训练模块</th>
-                    <th>训练任务</th>
-                    <th>集训类型</th>
-                    <th>日志文件</th>
-                    <th>上传时间</th>
-                    <th>完成度(%)</th>
-                    <th>教练评价</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for training_log in training_logs %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ training_log.user.real_name }}</td>
-                    <td>
-                        {% for role in training_log.user.roles %}
-                        {%if role.name in ['coach', 'competitor']%}
-                        {{ role.display_name }}{% if not loop.last %}, {% endif %}
-                        {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>{{ training_log.date }}</td>
-                    <td>{{ training_log.module.display_name }}</td>
-                    <td>{{ training_log.task }}</td>
-                    <td>{{ training_log.type.display_name }}</td>
-                    <td><a href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
-                            training_log.file
-                            }}</a>
-                    </td>
-                    <td>{{ training_log.uploaded_on }}</td>
-                    <td>
-                        {% if training_log.evaluation.score %}
-                        {{ training_log.evaluation.score }}
-                        {% else %}
-                        未评价
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if training_log.evaluation.comment %}
-                        {{ training_log.evaluation.comment | summary(5) }}
-                        {% else %}
-                        未评价
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if training_log.user_id == current_user.id %}
-                        <a href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
-                        {% else %}
-                        删除
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div  class="py-3" style="display: grid; grid-template-columns:300px auto; gap:12px">
 
-    <div>
+    <div class="rounded border p-3">
         <!-- 筛选姓名 -->
         <div>筛选姓名：
             <a href="">全部</a>
             {% for name in unique_users %}
-            <a href="?name={{ name }}">{{ name }}</a>
+            <a class="text-decoration-none" href="?name={{ name }}">{{ name }}</a>
             {% endfor %}
         </div>
 
@@ -129,6 +64,72 @@
         </div>
 
     </div>
+
+    <div class="table-responsive rounded border p-3">
+        <table id="training-logs" class="table table-hover text-center">
+            <thead class="table-light text-nowrap">
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>角色</th>
+                    <th>训练日期</th>
+                    <th>训练模块</th>
+                    <th>训练任务</th>
+                    <th>日志文件</th>
+                    <th>上传时间</th>
+                    <th>完成度(%)</th>
+                    <th>教练评价</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody class="text-nowrap">
+                {% for training_log in training_logs %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ training_log.user.real_name }}</td>
+                    <td>
+                        {% for role in training_log.user.roles %}
+                        {%if role.name in ['coach', 'competitor']%}
+                        {{ role.display_name }}{% if not loop.last %}, {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ training_log.date }}</td>
+                    <td>{{ training_log.module.display_name }}</td>
+                    <td>{{ training_log.task | summary(10) }}</td>
+                    <td><a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
+                            training_log.file | summary_middle(40)
+                            }}</a>
+                    </td>
+                    <td>{{ training_log.uploaded_on }}</td>
+                    <td>
+                        {% if training_log.evaluation.score %}
+                        {{ training_log.evaluation.score }}
+                        {% else %}
+                        未评价
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if training_log.evaluation.comment %}
+                        {{ training_log.evaluation.comment | summary(5) }}
+                        {% else %}
+                        未评价
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if training_log.user_id == current_user.id %}
+                        <a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
+                        {% else %}
+                        删除
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
 </div>
 
 {% endblock content %}

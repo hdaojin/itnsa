@@ -49,14 +49,29 @@ def create_app():
     def format_date_Ym(date):
         return date.strftime('%Y/%m')
 
-    # 创建一个自定义 Jinja2 过滤器，用于显示文本的摘要
+    # 创建一个自定义 Jinja2 过滤器，用于显示文本的摘要, 默认长度为 50 个字符, 可以通过参数指定长度, 超出长度的部分用 ... 代替
     @app.template_filter('summary')
-    def summary(text, length=50, suffix=' ......'):
+    def summary(text, length=50, suffix=' ...'):
         if len(text) <= length:
             return text
         else:
             return text[:length] + suffix
-
+        
+    # 创建一个自定义 Jinja2 过滤器，用于显示文本的摘要, 默认长度为 50 个字符, 可以通过参数指定长度, 超出长度后，保留两端，中间的部分用 ... 代替
+    @app.template_filter('summary_middle')
+    def summary_middle(text, length=50, suffix=' ... '):
+        if len(text) <= length:
+            return text
+        else:
+            return text[:length//2] + suffix + text[-length//2:]
+    
+    # 创建一个自定义 Jinja2 过滤器，用于显示文本的摘要, 默认长度为 50 个字符, 可以通过参数指定长度, 超出长度后，保留右端，左端的部分用 ... 代替
+    @app.template_filter('summary_right')
+    def summary_right(text, length=50, suffix='... '):
+        if len(text) <= length:
+            return text
+        else:
+            return suffix + text[-length:]
 
     with app.app_context():
         # register blueprints
