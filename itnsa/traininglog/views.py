@@ -32,17 +32,15 @@ def get_special_role_display_name():
             return role.display_name
     return None
 
-def get_unique_roles_display_name():
-    # 返回所有角色的display_name, 除了'admin'角色
-    roles = db.session.execute(db.select(Role).where(Role.name != 'admin').order_by(Role.id)).scalars().all()
-    #return set([role.display_name for role in roles])
-    return [role.display_name for role in roles]
-
-def get_unique_users_display_name():
-    # 返回所有用户的display_name
+# Get user id and real_name for all users
+def get_all_users():
     users = db.session.execute(db.select(User).order_by(User.id)).scalars().all()
-    # return set([user.real_name for user in users])
-    return [user.real_name for user in users]
+    return [(user.id, user.real_name) for user in users]
+
+# Get role id and display_name for all roles
+def get_all_roles():
+    roles = db.session.execute(db.select(Role).where(Role.name != 'admin').order_by(Role.id)).scalars().all()
+    return [(role.id, role.display_name) for role in roles]
 
 def get_month_calendar(year, month):
     # 返回指定月的日历
@@ -108,86 +106,138 @@ def upload_training_log():
 
         file.save(upload_folder_path.joinpath(filename))
         flash('上传成功', 'success')
-        return redirect(url_for('traininglog.list_training_logs', year=date.year, month=date.month))
+        return redirect(url_for('traininglog.list_training_logs', month=date.strftime('%Y-%m')))
     else:
         print(form.errors)
     
     return render_template('traininglog/upload.html', title='上传训练日志', form = form)
 
-# 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定月份；如果用户是管理员，则显示所有用户的训练日志，如果用户是教练，则显示自己和学员的训练日志，如果用户是学员，则显示自己和教练的训练日志。默认以date降序排列。
-@traininglog.route('/list/<int:year>/<int:month>/')
+# 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定其他过滤条件，如角色，用户名，月份，日期等；默认以date降序排列。实现权限控制和分页功能。
+@traininglog.route('/list/')
 @login_required
-def list_training_logs(year=None, month=None):
-    # get all unique roles, users, and month calendar
-    unique_roles = get_unique_roles_display_name()
-    unique_users = get_unique_users_display_name()
+def list_training_logs():
+    # 接收浏览器传递的参数, 包括用户id，角色，月份，日期
+    user_id = request.args.get('user_id')
+    role_id = request.args.get('role_id')
+    year_month = datetime.strptime(request.args.get('month'), '%Y-%m') if request.args.get('month') else None
+    year_month_day = datetime.strptime(request.args.get('date'), '%Y-%m-%d') if request.args.get('date') else None
 
+    # 获得给定的年份和月份，如果没有则默认为当前年份和月份
+    now = datetime.now()
+    year = year_month.year if year_month else now.year
+    month = year_month.month if year_month else now.month
+    date = year_month_day.date() if year_month_day else None
+
+    if date:
+        year = date.year
+        month = date.month
+
+    today = now.day # 今天的号, 用于在模板的日历中比较和高亮显示今天的号
+
+    # 计算上个月,这个月和下个月的年份和月份
+    last_month = {'year': year - 1, 'month': 12} if month == 1 else {'year': year, 'month': month - 1}
+    current_month = {'year': now.year, 'month': now.month}
+    next_month = {'year': year + 1, 'month': 1} if month == 12 else {'year': year, 'month': month + 1}
+
+    # 获取所有角色的id和display_name，所有用户的ID和real_name，以及指定月的日历，用于在模板中显示点击链接筛选相关数据
+    roles = get_all_roles()
+    users = get_all_users()
     cal = get_month_calendar(year, month)
 
+    # 实现分页功能所需的参数, 从请求的查询参数获取当前页码，如果没有则默认为1；从配置文件获取每页显示的记录数        
+    page = request.args.get('page', 1, type=int)   # 默认显示第一页
+    per_page = current_app.config['ENTRYS_PER_PAGE'] # 每页显示的记录数
 
-    # 接收浏览器传递的参数
-    name = request.args.get('name')
-    role = request.args.get('role')
-    date = datetime.strptime(request.args.get('date'), '%Y-%m-%d').date() if request.args.get('date') else None
 
-    # Get current year and month
-    now = datetime.now()
-    current_month = {'year': now.year, 'month': now.month}
-    today = now.day
+    # 基础查询逻辑：查询一个月内所有的训练日志，按训练日期降序排列
+    start_date = datetime(year, month, 1).date()
+    end_date = datetime(year, month, calendar.monthrange(year, month)[1]).date()
+    base_query = db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date <= end_date)
 
-    if not year:
-        year = now.year
-    if not month:
-        month = now.month
-
-    # Get last  month
-    if month == 1:
-        last_month = {'year': year - 1, 'month': 12}
+    # 如果用户指定了user_id, role, date等参数，则根据这些参数进行过滤
+    if year_month:
+        query = base_query
+    elif user_id:
+        query = base_query.where(TrainingLog.user_id == user_id)
+    elif role_id:
+        query = base_query.where(TrainingLog.user.has(User.roles.any(Role.id == role_id)))
+    elif date:
+        query = base_query.where(TrainingLog.date == date)
     else:
-        last_month = {'year': year, 'month': month - 1}
+        query = base_query
 
-    # get a month
-    start_date = datetime(year, month, 1)
-    end_date = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
-
-    # select logics
-    
-    query = db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date < end_date)
-
-    # Date filter using request args(role, name, date)
-    if role:
-        query = query.where(TrainingLog.user.has(User.roles.any(Role.display_name == role)))
-    if name:
-        query = query.where(TrainingLog.user.has(User.real_name == name))
-    if date:
-        query = query.where(TrainingLog.date == date)
-
+    # 权限控制逻辑：
+        # 如果用户是管理员，则显示所有用户的训练日志列表；
+        # 如果用户是教练，则显示自己和学员的训练日志（用于中国集训队时可以同时显示其他教练的日志列表）；
+        # 如果用户是选手，则显示自己和所有教练的训练日志。
+        # 如果用户是游客，则只显示自己的训练日志。
 
     # Display all training logs if user is admin
     if current_user.has_role('admin'):
-        training_logs = db.session.execute(query.order_by(desc(TrainingLog.date))).scalars()
+        query = query
     else:
         # Get IDs of all coaches and competitors
         coaches_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='coach')).scalars().all()
         competitors_ids = db.session.execute(db.select(User.id).join(User.roles).where(Role.name=='competitor')).scalars().all()
-        # If current user if a coach who can view all training logs of competitors and himself
+        
+        # # If current user is a coach who can view all training logs of competitors and himself
+        # if current_user.has_role('coach') and not current_user.has_role('admin'):
+        #     allowed_ids = [current_user.id] + competitors_ids
+        
+        # If current user is a coach who can view all training logs of competitors, cocach
         if current_user.has_role('coach') and not current_user.has_role('admin'):
-            allowed_ids = [current_user.id] + competitors_ids
-        # If current user if a coach who can view all training logs of competitors, cocach
             allowed_ids = competitors_ids + coaches_ids
-        # If current user if a competitor who can view all training logs of coaches and himself
+        
+        # If current user is a competitor who can view all training logs of coaches and himself
         elif current_user.has_role('competitor'):
             allowed_ids = [current_user.id] + coaches_ids
+        
+        # If current user is a guest who can only view all training logs of himself
         else:
             allowed_ids = [current_user.id]
         
-        training_logs = db.session.execute(query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(desc(TrainingLog.date))).scalars()
+        query = query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(desc(TrainingLog.date)).order_by(desc(TrainingLog.uploaded_on))
+    
+    # 分页查询
+    # training_log_pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+    # if training_log_pagination:
+    #     training_logs = training_log_pagination.items
+    # else:
+    #     abort(404)
+    training_logs = db.session.execute(query).scalars().all()
 
+    # Dynamically generate title based the filter arguments, if no filter arguments, then use the a month's title
+    if user_id:
+        user_real_name = db.session.execute(db.select(User.real_name).where(User.id == int(user_id))).scalar_one()
+        title_prefix = f"{user_real_name} {now.year}年{now.month}月的"
+    elif role_id:
+        role_display_name = db.session.execute(db.select(Role.display_name).where(Role.id == role_id)).scalar_one()
+        title_prefix = f"{role_display_name} {now.year}年{now.month}月的"
+    elif date:
+        if date == datetime.now().date():
+            title_prefix = "今天的"
+        elif date == datetime.now().date() - timedelta(days=1):
+            title_prefix = "昨天的"
+        else:
+            title_prefix = f"{date.strftime('%Y-%m-%d')}的"
+    else:
+        title_prefix = f"{year}年{month}月的"
 
-    end_date = end_date - timedelta(days=1)
-    title = f"{start_date.strftime('%Y.%m.%d')} - {end_date.strftime('%Y.%m.%d')} 训练日志列表"
+    title = title_prefix + "训练日志列表"
 
-    return render_template('traininglog/list.html', title=title, training_logs=training_logs, year=year, month=month, last_month=last_month, current_month=current_month, cal=cal, today=today, unique_roles=unique_roles, unique_users=unique_users)
+    return render_template('traininglog/list.html', 
+                            title=title, 
+                            # training_log_pagination=training_log_pagination, 
+                            training_logs=training_logs, 
+                            year=year, 
+                            month=month, 
+                            last_month=last_month, 
+                            current_month=current_month,
+                            next_month=next_month, 
+                            cal=cal, today=today, 
+                            users=users,
+                            roles=roles
+                           )
 
 # view training log and evaluation
 @traininglog.route('/view/<path:filename>')
@@ -255,4 +305,4 @@ def delete_training_log(id):
     db.session.delete(training_log)
     db.session.commit()
     flash('删除成功', 'success')
-    return redirect(url_for('traininglog.list_training_logs', year=training_log.date.year, month=training_log.date.month))
+    return redirect(url_for('traininglog.list_training_logs', month=training_log.date.strftime('%Y-%m')))

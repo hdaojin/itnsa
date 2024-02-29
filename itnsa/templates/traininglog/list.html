@@ -1,35 +1,35 @@
+<!-- templates/traininglog/list.html -->
 {% extends 'base.html' %}
 
 {% if current_user.is_authenticated %}
 
 {% block content %}
-<div  class="py-3" style="display: grid; grid-template-columns:300px auto; gap:12px">
+<div class="py-3" style="display: grid; grid-template-columns:300px auto; gap:12px">
 
     <div class="rounded border border-secondary p-3">
         <!-- 筛选姓名 -->
         <div>
-            <p>筛选姓名：<a href="?name=">全部</a></p>
+            <p>筛选姓名：<a href="{{ url_for('traininglog.list_training_logs') }}">全部</a></p>
             <p>
-                {% for name in unique_users %}
-                    <a class="text-decoration-none" href="?name={{ name }}">{{ name }}</a>
+                {% for user in users %}
+                <a class="text-decoration-none" href="?user_id={{ user[0] }}">{{ user[1] }}</a>
                 {% endfor %}
             </p>
         </div>
-
         <!-- 筛选角色 -->
         <div class="mt-3">
-            <p>筛选角色：<a href="?role=">全部</a></p>
+            <p>筛选角色：<a href="{{ url_for('traininglog.list_training_logs') }}">全部</a></p>
             <p>
-                {% for role in unique_roles %}
-                    <a href="?role={{ role }}">{{ role }}</a>
+                {% for role in roles %}
+                <a href="?role_id={{ role[0] }}">{{ role[1] }}</a>
                 {% endfor %}
             </p>
         </div>
 
         <!-- 筛选日期 -->
         <div class="mt-3">
-            <p>筛选日期：<a href="?date=">{{ year }}年{{ month }}月</a></p>
-            
+            <p>筛选日期：<a href="?month={{ year }}-{{ month }}">{{ year }}年{{ month }}月</a></p>
+
             <table class="table text-center" style="width: auto; margin: auto;">
                 <thead>
                     <tr>
@@ -65,14 +65,20 @@
         <!--上个月-->
         <div class="mt-3">
             上一个月：
-            <a href="{{ url_for('traininglog.list_training_logs', year=last_month.year, month=last_month.month) }}">{{ last_month.year }}年{{ last_month.month }}月</a>
+            <a href="?month={{ last_month.year }}-{{ last_month.month }}">{{
+                last_month.year }}年{{ last_month.month }}月</a>
         </div>
-
+        <!--下个月-->
+        <div class="mt-3">
+            下一个月：
+            <a href="?month={{ next_month.year }}-{{ next_month.month }}">{{
+                next_month.year }}年{{ next_month.month }}月</a>
+        </div>
     </div>
 
     <div class="table-responsive rounded border border-secondary p-3">
         <table id="training-logs" class="table table-hover">
-            <thead class="table-light text-nowrap text-center">
+            <thead class="table-light text-nowrap">
                 <tr>
                     <th>序号</th>
                     <th>姓名</th>
@@ -90,7 +96,7 @@
             <tbody class="text-nowrap table-group-divider">
                 {% for training_log in training_logs %}
                 <tr>
-                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ loop.index }}</td>
                     <td>{{ training_log.user.real_name }}</td>
                     <td>
                         {% for role in training_log.user.roles %}
@@ -101,9 +107,10 @@
                     </td>
                     <td>{{ training_log.date }}</td>
                     <td>{{ training_log.module.display_name }}</td>
-                    <td>{{ training_log.task | summary(20) }}</td>
-                    <td><a class="text-decoration-none" href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
-                            training_log.file | summary_middle(65)
+                    <td>{{ training_log.task | summary(30) }}</td>
+                    <td><a class="text-decoration-none"
+                            href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
+                            training_log.file | summary_middle(64)
                             }}</a>
                     </td>
                     <td>{{ training_log.uploaded_on }}</td>
@@ -123,7 +130,8 @@
                     </td>
                     <td>
                         {% if training_log.user_id == current_user.id %}
-                        <a class="text-decoration-none" href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
+                        <a class="text-decoration-none"
+                            href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
                         {% else %}
                         删除
                         {% endif %}
@@ -133,9 +141,17 @@
             </tbody>
         </table>
     </div>
-
-
 </div>
+
+
+{#  
+<!-- 分页 -->
+<div class="d-flex justify-content-end">
+    {% from "_pagination.html" import render_pagination %}
+    {{ render_pagination(training_log_pagination, 'traininglog.list_training_logs') }}
+</div>
+#}
+
 
 {% endblock content %}
 
