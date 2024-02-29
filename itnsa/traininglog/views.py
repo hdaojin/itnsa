@@ -145,8 +145,8 @@ def list_training_logs():
     cal = get_month_calendar(year, month)
 
     # 实现分页功能所需的参数, 从请求的查询参数获取当前页码，如果没有则默认为1；从配置文件获取每页显示的记录数        
-    page = request.args.get('page', 1, type=int)   # 默认显示第一页
-    per_page = current_app.config['ENTRYS_PER_PAGE'] # 每页显示的记录数
+    # page = request.args.get('page', 1, type=int)   # 默认显示第一页
+    # per_page = current_app.config['ENTRYS_PER_PAGE'] # 每页显示的记录数
 
 
     # 基础查询逻辑：查询一个月内所有的训练日志，按训练日期降序排列
