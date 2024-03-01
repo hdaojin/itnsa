@@ -13,7 +13,7 @@ from itnsa.traininglog.forms import TrainingLogUploadForm, TrainingLogEvaluation
 from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType, TrainingLogEvaluation
 from itnsa.traininglog import traininglog
 
-upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
+upload_folder = Path(current_app.config['UPLOAD_FOLDER']).joinpath('training_logs')
 
 # upload training log using flask-wtf form to UPLOAD_FOLDER and save filename to database
 
