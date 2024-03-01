@@ -1,55 +1,71 @@
 <!-- templates/traininglog/stats.html -->
 {% extends 'base.html' %}
 
+{% if current_user.is_authenticated %}
+
 {% block content %}
 
-<!-- 表单开始 -->
-<div class="container mt-4">
-    <form action="{{ url_for('traininglog.log_stats') }}" method="get">
-        <div class="row mb-3">
-            <div class="col">
-                <label for="year" class="form-label">年份</label>
-                <select class="form-select" id="year" name="year">
-                    <!-- 假设提供过去5年的选项 -->
-                    {% for y in range(now.year, now.year-5, -1) %}
+<!--年月选择表单-->
+<div class="container">
+    <form action="{{ url_for('traininglog.log_stats') }}" method="get" class="d-flex justify-content-center">
+        <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center">
+                <label for="year" class="col-auto me-2">年份: </label>
+                <select class="form-select me-2" id="year" name="year">
+                    <!-- 假设提供过去3年的选项 -->
+                    {% for y in range(now.year, now.year-3, -1) %}
                     <option value="{{ y }}" {% if y==year %}selected{% endif %}>{{ y }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col">
-                <label for="month" class="form-label">月份</label>
-                <select class="form-select" id="month" name="month">
+            <div class="d-flex align-items-center">
+                <label for="month" class="col-auto me-2">月份: </label>
+                <select class="form-select me-2" id="month" name="month">
                     {% for m in range(1, 13) %}
                     <option value="{{ m }}" {% if m==month %}selected{% endif %}>{{ m }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col"><button type="submit" class="btn btn-primary">查询</button></div>
+            <div class="d-flex align-content-center">
+                <button type="submit" class="btn btn-primary">查询</button>
+            </div>
         </div>
     </form>
 </div>
 
-<!--表单结束 -->
+<!--统计结果概述-->
+<div class="mt-3 text-center">
+    <div class="alert alert-primary" role="alert">
+        {{ year }}年{{ month }}月到目前为止，已收到训练日志：
+        教练 <span class="text-success">{{ counts.coachs_traininglogs_count }} </span> 份，
+        选手 <span class="text-success">{{ counts.competitors_traininglogs_count }} </span> 份。
+    </div>
+</div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>日期</th>
-            <th>已提交的教练</th>
-            <th>已提交的选手</th>
-            <th>未提交的选手</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for day, info in daily_stats.items() %}
-        <tr>
-            <td>{{ year }}年{{ month }}月{{ day }}日</td>
-            <td>{{ info.coach|join(', ') }}</td>
-            <td>{{ info.competitor_submitted|join(', ') }}</td>
-            <td></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!--统计结果明细表格-->
+<div class="mt-3">
+    <table class="table table-bordered">
+        <thead class="text-center">
+            <tr>
+                <th>日期</th>
+                <th>已提交的教练</th>
+                <th>已提交的选手</th>
+                <th>未提交的选手</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day, info in daily_stats.items() %}
+            <tr>
+                <td class="text-center">{{ year }}年{{ month }}月{{ day }}日</td>
+                <td>{{ info.coach|join(', ') }}</td>
+                <td>{{ info.competitor_submitted|join(', ') }}</td>
+                <td>{{ info.competitor_not_submitted|join(', ') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}
+
+{% endif %}

@@ -29,7 +29,7 @@
 
                     {# 用户登录后的菜单 #}
                     {% if current_user.is_authenticated %}
-                    {# 上传训练日志的菜单, 使用下拉菜单的形式 #}
+                    {# 上传训练日志的菜单, 使用下拉菜单的形式
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="training-log" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,11 +41,24 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    {# "教学笔记"的菜单 #}
+                    #}
+                    {# 上传训练日志的菜单 #}
+                    {% for item in nav.training_log %}
                     <li class="nav-item">
-                        {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
-                        {% for item in nav.note %}
                         {% if item.url == request.path %}
+                        {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
+                        <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
+                        {% else %}
+                        <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </li>
+
+                    {# "教学笔记"的菜单 #}
+                    {% for item in nav.note %}
+                    <li class="nav-item">
+                        {% if item.url == request.path %}
+                        {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
                         <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
                         {% else %}
                         <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>

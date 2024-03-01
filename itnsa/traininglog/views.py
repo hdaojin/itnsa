@@ -313,37 +313,48 @@ def delete_training_log(id):
 @traininglog.route('/stats')
 @login_required
 def log_stats():
-    """Statistics of training log submissions."""
     now = datetime.now()
     year = request.args.get('year', default=now.year, type=int)
     month = request.args.get('month', default=now.month, type=int)
-    
-    first_day = datetime(year, month, 1).date()
-    last_day = datetime(year, month, calendar.monthrange(year, month)[1]).date()
 
-    traininglogs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date.between(first_day, last_day))).scalars().all()
+    first_day = datetime(year, month, 1).date()
+    # 如果是当前月份，则last_day为今天的日期
+    if year == now.year and month == now.month:
+        last_day = now.date()
+    else:
+        last_day = datetime(year, month, calendar.monthrange(year, month)[1]).date()
+
+    training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date.between(first_day, last_day))).scalars().all()
 
     # 初始化每天的统计数据
-    daily_stats = { day: {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []} for day in range(1, calendar.monthrange(year, month)[1] + 1) }
+    daily_stats = {day: {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []} for day in range(1, last_day.day + 1)}
 
     # 预先查询所有的选手
     competitors_query = db.select(User).join(User.roles).where(Role.name == "competitor")
-    all_competitors = set(db.session.execute(competitors_query).scalars().all())  # 使用集合便于之后的操作
+    all_competitors = set(db.session.execute(competitors_query).scalars().all())
 
-    for date in range(1, last_day.day + 1):
-        daily_stats[date] = {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []}
-        if traininglogs:
-            for traininglog in traininglogs:
-                if traininglog.date.day == date:
-                    # 获取已提交日志的教练
-                    if traininglog.user.has_role('coach'):
-                        daily_stats[date]['coach'].append(traininglog.user.real_name)
-                    # 获取已提交日志的选手
-                    elif traininglog.user.has_role('competitor'):
-                        daily_stats[date]['competitor_submitted'].append(traininglog.user.real_name)
-                    # 获取未提交日志的选手
-                    if traininglog.user in all_competitors:
-                        competitors_not_submitted = all_competitors - set([traininglog.user])
-                        daily_stats[date]['competitor_not_submitted'] = list(competitor.real_name for competitor in competitors_not_submitted)
+    submitted_competitors_per_day = {day: set() for day in range(1, last_day.day + 1)}
 
-    return render_template('traininglog/stats.html', title='训练日志提交情况统计', daily_stats=daily_stats, now=now, year=year, month=month)
+    for traininglog in training_logs:
+        day = traininglog.date.day
+        if traininglog.user.has_role('coach'):
+            daily_stats[day]['coach'].append(traininglog.user.real_name)
+        elif traininglog.user.has_role('competitor'):
+            daily_stats[day]['competitor_submitted'].append(traininglog.user.real_name)
+            submitted_competitors_per_day[day].add(traininglog.user)
+
+    # 计算未提交日志的选手
+    for day in range(1, last_day.day + 1):
+        submitted_competitors = submitted_competitors_per_day[day]
+        not_submitted_competitors = all_competitors - submitted_competitors
+        daily_stats[day]['competitor_not_submitted'] = [competitor.real_name for competitor in not_submitted_competitors]
+
+    coachs_traininglogs_count = sum(len(logs['coach']) for logs in daily_stats.values())
+    competitors_traininglogs_count = sum(len(logs['competitor_submitted']) for logs in daily_stats.values())
+
+    counts = {
+        'coachs_traininglogs_count': coachs_traininglogs_count,
+        'competitors_traininglogs_count': competitors_traininglogs_count,
+    }
+
+    return render_template('traininglog/stats.html', title='训练日志提交情况统计', daily_stats=daily_stats, now=now, year=year, month=month, counts=counts)
