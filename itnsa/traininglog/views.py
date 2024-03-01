@@ -196,15 +196,14 @@ def list_training_logs():
         else:
             allowed_ids = [current_user.id]
         
-        query = query.where(TrainingLog.user_id.in_(allowed_ids)).order_by(desc(TrainingLog.date)).order_by(desc(TrainingLog.uploaded_on))
-    
+        query = query.where(TrainingLog.user_id.in_(allowed_ids))
     # 分页查询
     # training_log_pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
     # if training_log_pagination:
     #     training_logs = training_log_pagination.items
     # else:
     #     abort(404)
-    training_logs = db.session.execute(query).scalars().all()
+    training_logs = db.session.execute(query.order_by(desc(TrainingLog.date)).order_by(desc(TrainingLog.uploaded_on))).scalars().all()
 
     # Dynamically generate title based the filter arguments, if no filter arguments, then use the a month's title
     if user_id:
