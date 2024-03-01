@@ -27,7 +27,8 @@ def inject_nav():
             ],
             'training_log': [
                 {'name': '上传日志', 'url': url_for('traininglog.upload_training_log')},
-                {'name': '日志列表', 'url': url_for('traininglog.list_training_logs')}
+                {'name': '日志列表', 'url': url_for('traininglog.list_training_logs')},
+                {'name': '日志统计', 'url': url_for('traininglog.log_stats')}
             ],
             'note': [
                 {'name': '教学笔记', 'url': url_for('note.list_note_folders')}
