@@ -96,8 +96,7 @@ class TrainingType(db.Model):
 # Define TrainingLogs table
 class TrainingLog(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    role: Mapped[str] = mapped_column(String(64), nullable=False)
-    date: Mapped[date] = mapped_column(Date, nullable=False)
+    train_date: Mapped[date] = mapped_column(Date, nullable=False)
     uploaded_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     task: Mapped[str] = mapped_column(String(512), nullable=False)
     file: Mapped[str] = mapped_column(String(512), nullable=False)
@@ -118,4 +117,3 @@ class TrainingLogEvaluation(db.Model):
     user: Mapped['User'] = relationship() # one-to-many relationship with Users
     training_log_id: Mapped[int] = mapped_column(Integer, ForeignKey("training_log.id"), nullable=False) # one-to-many relationship with TrainingLogs
     training_log: Mapped['TrainingLog'] = relationship(back_populates='evaluation') # one-to-many relationship with TrainingLogs
-
