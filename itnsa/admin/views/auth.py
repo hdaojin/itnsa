@@ -1,4 +1,4 @@
-from flask import render_template, abort, redirect, url_for, flash, request
+from flask import render_template, abort, redirect, url_for, flash, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_required, current_user
 
@@ -125,10 +125,15 @@ def roles():
     return abort(403)
 
 # Gernerate registration link with token
-@admin.route('/gernerate-registration-link')
+@admin.route('/registration-link')
 @login_required
 @admin_required
+def reg_link():
+    return render_template('admin/auth/reg-link.html', title='注册链接')
+
+@admin.route('/api/generate-registration-link')
 def gen_reg_link():
     link, link_age = generate_registration_link()
-    return render_template('admin/auth/gen-reg-link.html', link=link, link_age=link_age, title='生成注册链接')
+    # return render_template('admin/auth/gen-reg-link.html', link=link, link_age=link_age, title='生成注册链接')
+    return jsonify({'link': link, 'link_age': link_age})
 

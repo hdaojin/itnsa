@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="pt-3">
+    <button id="generate-btn" class="btn btn-primary">生成注册链接</button>
+    <p id="link-container" class="mt-3"></p>
+    <p class="mt-3">请点击按钮生成注册链接，并将此链接发送给用户以便注册</p>
+    <p id="link-age-container" class="mt-3"></p>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            fetch("{{ url_for('admin.gen_reg_link') }}")
+                .then(response => response.json())
+                .then(data => {
+                    const linkContainer = document.getElementById('link-container');
+                    linkContainer.innerHTML = `<a href="${data.link}">${data.link}</a>`;
+
+                    // 更新链接有效期显示
+                    const linkAgeContainer = document.getElementById('link-age-container');
+                    linkAgeContainer.innerHTML = `请注意：此链接有效期为 ${data.link_age/60/60}小时`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
+{% endblock script %}

@@ -16,7 +16,7 @@ def inject_admin_nav():
         {'name': '添加训练模块', 'url': url_for('admin.add_training_module')},
         {'name': '用户列表', 'url': url_for('admin.users')},
         {'name': '角色列表', 'url': url_for('admin.roles')},
-        {'name': '生成注册链接', 'url': url_for('admin.gen_reg_link')}
+        {'name': '注册链接', 'url': url_for('admin.reg_link')}
     ]
 
     if current_user.is_authenticated:

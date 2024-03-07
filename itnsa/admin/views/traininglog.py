@@ -24,7 +24,7 @@ class TrainingModuleView(BaseView):
 @admin_required
 def add_training_module():
     form = TrainingLogModuleForm()
-    return TrainingModuleView.handle_form_submission(form, 'admin/form.html', 'admin.index', title="添加训练模块")
+    return TrainingModuleView.handle_form_submission(form, 'admin/_form.html', 'admin.index', title="添加训练模块")
 
 # List all training modules
 @admin.route('training-module/list')
