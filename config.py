@@ -18,6 +18,8 @@ class Config(object):
     ALLOWED_EXTENSIONS = ['pdf','zip','rar','7z']
     # Set entrys per page
     ENTRYS_PER_PAGE = 20
+    # Set the default training_type, select from 'WorldSkillsItnsaEliteClass', 'WorldSkillsItnsaChinaTeam'
+    DEFAULT_TRAINING_TYPE = 'WorldSkillsItnsaEliteClass' 
 
 class DevelopmentConfig(Config):
     """Development config class."""

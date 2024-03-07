@@ -2,7 +2,7 @@ from pathlib import Path
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import app_config
-from itnsa.commands import init_app, add_administrator
+from itnsa.commands import drop_db, init_app, add_administrator
 
 
 def create_app():
@@ -40,8 +40,10 @@ def create_app():
     login_manager.login_message_category = 'info'
     
     # register commands
+    app.cli.add_command(drop_db)
     app.cli.add_command(init_app)
     app.cli.add_command(add_administrator)
+
 
     # Custom Jinja2 filters
     # 创建一个自定义 Jinja2 过滤器，用于格式化日期

@@ -9,21 +9,25 @@ default_roles = [
     {
         'name': 'admin',
         'display_name': '管理员',
+        'short_name': '管理员',
         'description': '管理员角色。'
     },
     {
         'name': 'coach',
         'display_name': '教练',
+        'short_name': '教练',
         'description': '教练角色。'
     },
     {
         'name': 'competitor',
         'display_name': '选手',
+        'short_name': '选手',
         'description': '选手角色。'
     },
     {
         'name': 'guest',
         'display_name': '游客',
+        'short_name': '游客',
         'description': '游客角色。'
     }
 ]
@@ -32,36 +36,43 @@ traning_modules = [
     {
         'name': 'Linux',
         'display_name': 'Linux环境',
+        'short_name': 'Linux',
         'description': 'Linux系统与网络服务配置。'
     },
     {
         'name': 'Windows',
         'display_name': 'Windows环境',
+        'short_name': 'Windows',
         'description': 'Windows系统与网络服务配置。'
     },
     {
         'name': 'Network',
         'display_name': 'Network环境',
+        'short_name': 'Network',
         'description': '网络设备配置。'
     },
     {
         'name': 'Automation',
         'display_name': '自动化运维',
+        'short_name': '自动化',
         'description': '基础设施可编程性与自动化。'
     },
     {
         'name': 'English',
         'display_name': 'English',
+        'short_name': 'English',
         'description': '英语语言能力。'
     },
     {
         'name': 'Troubleshooting',
         'display_name': '秘密挑战与故障排除',
+        'short_name': '排错',
         'description': '秘密挑战与故障排除。'
     },
     {
         'name': 'Other',
         'display_name': '其他',
+        'short_name': '其他',
         'description': '其他。'
     }
 ]
@@ -70,13 +81,15 @@ traning_types = [
     {
         'name': 'WorldSkillsItnsaEliteClass',
         'display_name': '世界技能大赛网络系统管理项目精英班',
+        'short_name': '世赛网管精英班',
         'description': '世界技能大赛网络系统管理项目精英班和种子选手日常训练。'
     },
-    {
-        'name': 'WorldSkillsItnsaChinaTeam',
-        'display_name': '世界技能大赛网络系统管理项目中国集训队',
-        'description': '世界技能大赛网络系统管理项目中国集训队集中训练，强化训练。'
-    }
+    # {
+    #     'name': 'WorldSkillsItnsaChinaTeam',
+    #     'display_name': '世界技能大赛网络系统管理项目中国集训队',
+    #     'short_name': '世赛网管中国集训队',
+    #     'description': '世界技能大赛网络系统管理项目中国集训队集中训练，强化训练。'
+    # }
 ]
 
 # Replace with flask-migrate
@@ -98,6 +111,18 @@ traning_types = [
 #     db.drop_all()
 #     click.echo('Dropped the database.')
 
+
+
+# Remove all data from the tables of the database
+def clear_data():
+    """Remove all data from the tables of the database."""
+    db.session.execute(db.delete(User))
+    db.session.execute(db.delete(UserProfile))
+    db.session.execute(db.delete(Role))
+    db.session.execute(db.delete(TrainingModule))
+    db.session.execute(db.delete(TrainingType))
+    db.session.commit()
+    click.echo('Cleared all data from the tables of the database.')
 
 # Add default training modules
 def add_default_training_modules():
@@ -142,6 +167,17 @@ def add_default_roles():
     db.session.commit()
     click.echo('Inserted default roles.')
 
+# Drop the database
+@click.command('drop-db')
+def drop_db():
+    """Drop the database."""
+    input = click.prompt('Are you sure to drop the database? This operation will delete all data from the database. Please input "yes" to confirm.')
+    if input != 'yes':
+        click.echo('Operation cancelled.')
+        sys.exit(1)
+    db.drop_all()
+    click.echo('Dropped the database.')
+
 # Add administrator
 @click.command('add-admin')
 @click.option('-u', '--username', prompt=True, hide_input=False, confirmation_prompt=False)
@@ -175,6 +211,7 @@ def add_administrator(username, password):
 @click.command('init-app')
 def init_app():
     """Complete the application initialization for a new installation."""
+    clear_data()
     add_default_training_types()
     add_default_training_modules()
     add_default_roles()

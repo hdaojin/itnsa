@@ -14,6 +14,7 @@ from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingTy
 from itnsa.traininglog import traininglog
 
 upload_folder = Path(current_app.config['UPLOAD_FOLDER']).joinpath('training_logs')
+default_training_type = current_app.config['DEFAULT_TRAINING_TYPE']
 
 # upload training log using flask-wtf form to UPLOAD_FOLDER and save filename to database
 
@@ -25,11 +26,11 @@ def get_training_types():
     training_types = db.session.execute(db.select(TrainingType).order_by(TrainingType.id)).scalars().all()
     return [(training_type.name, training_type.display_name) for training_type in training_types]
 
-def get_special_role_display_name():
-    # 检查用户是否拥有'coach'或'competitor'角色，如果有，则返回该角色的display_name，否则返回None
+def get_special_role_of_user():
+    # 检查用户是否拥有'coach'或'competitor'角色，如果有，则返回该角色，否则返回None
     for role in current_user.roles:
         if role.name in ['coach', 'competitor']:
-            return role.display_name
+            return role
     return None
 
 # Get user id and real_name for all users
@@ -56,7 +57,7 @@ def upload_training_log():
     form.type.choices = get_training_types()
     if request.method == 'GET':
         #form.type.default = 'WorldSkillsItnsaEliteClass'
-        form.type.default = 'WorldSkillsItnsaChinaTeam'
+        form.type.default = default_training_type
         form.process()
 
     if form.validate_on_submit():
@@ -67,25 +68,24 @@ def upload_training_log():
         file = form.file.data
         name = current_user.real_name
         user_id = current_user.id
-        role = get_special_role_display_name()
+        role = get_special_role_of_user()
         if not role:
             flash('您没有权限。', 'danger')
             return redirect(url_for('traininglog.upload_training_log'))
         
         training_module = db.session.execute(db.select(TrainingModule).where(TrainingModule.name==module)).scalar_one()
         training_type = db.session.execute(db.select(TrainingType).where(TrainingType.name==type)).scalar_one()
-        complate_training_type_display_name = training_type.display_name + '训练日志'
+        complate_training_type_short_name = training_type.short_name + '训练日志'
 
-        filename = "-".join([complate_training_type_display_name, role, date.strftime('%Y.%m.%d'), name, training_module.display_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        filename = "-".join([complate_training_type_short_name, role.short_name, name, date.strftime('%Y.%m.%d'), training_module.short_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
 
         training_log = TrainingLog(
             module_id=training_module.id,
-            date=date,
+            train_date=date,
             task=task,
             type_id=training_type.id,
             file=filename,
             user_id=user_id,
-            role=role
         )
         db.session.add(training_log)
         db.session.commit()
@@ -152,7 +152,7 @@ def list_training_logs():
     # 基础查询逻辑：查询一个月内所有的训练日志，按训练日期降序排列
     start_date = datetime(year, month, 1).date()
     end_date = datetime(year, month, calendar.monthrange(year, month)[1]).date()
-    base_query = db.select(TrainingLog).where(TrainingLog.date >= start_date, TrainingLog.date <= end_date)
+    base_query = db.select(TrainingLog).where(TrainingLog.train_date >= start_date, TrainingLog.train_date <= end_date)
 
     # 如果用户指定了user_id, role, date等参数，则根据这些参数进行过滤
     if year_month:
@@ -203,7 +203,7 @@ def list_training_logs():
     #     training_logs = training_log_pagination.items
     # else:
     #     abort(404)
-    training_logs = db.session.execute(query.order_by(desc(TrainingLog.date)).order_by(desc(TrainingLog.uploaded_on))).scalars().all()
+    training_logs = db.session.execute(query.order_by(desc(TrainingLog.train_date)).order_by(desc(TrainingLog.uploaded_on))).scalars().all()
 
     # Dynamically generate title based the filter arguments, if no filter arguments, then use the a month's title
     if user_id:
@@ -240,6 +240,7 @@ def list_training_logs():
 
 # view training log and evaluation
 @traininglog.route('/view/<path:filename>')
+@login_required
 def uploaded_file(filename):
     """ list all training logs"""
     return send_from_directory(upload_folder, filename)
@@ -323,7 +324,7 @@ def log_stats():
     else:
         last_day = datetime(year, month, calendar.monthrange(year, month)[1]).date()
 
-    training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.date.between(first_day, last_day))).scalars().all()
+    training_logs = db.session.execute(db.select(TrainingLog).where(TrainingLog.train_date.between(first_day, last_day))).scalars().all()
 
     # 初始化每天的统计数据
     daily_stats = {day: {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []} for day in range(1, last_day.day + 1)}
@@ -335,7 +336,7 @@ def log_stats():
     submitted_competitors_per_day = {day: set() for day in range(1, last_day.day + 1)}
 
     for traininglog in training_logs:
-        day = traininglog.date.day
+        day = traininglog.train_date.day
         if traininglog.user.has_role('coach'):
             daily_stats[day]['coach'].append(traininglog.user.real_name)
         elif traininglog.user.has_role('competitor'):

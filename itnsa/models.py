@@ -49,6 +49,7 @@ class Role(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
+    short_name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
     users: Mapped[List["User"]] = relationship(secondary=user_role, back_populates="roles") # many-to-many relationship with Users
 
@@ -82,6 +83,7 @@ class TrainingModule(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+    short_name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
     training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='module') # one-to-many relationship with TrainingLogsTasks
 
@@ -90,6 +92,7 @@ class TrainingType(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+    short_name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=True)
     training_logs: Mapped[List["TrainingLog"]] = relationship(back_populates='type') # one-to-many relationship with TrainingLogsTasks
 

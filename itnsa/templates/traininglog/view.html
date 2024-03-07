@@ -5,7 +5,7 @@
 <!-- Display content of training log file -->
 <div>
     <iframe
-        src="{{ url_for('traininglog.uploaded_file', filename=training_log.date|format_date_Ym + '/' + training_log.file) }}"
+        src="{{ url_for('traininglog.uploaded_file', filename=training_log.train_date|format_date_Ym + '/' + training_log.file) }}"
         width="100%" height="960px">
         Your browser does not support display PDFs.
     </iframe>

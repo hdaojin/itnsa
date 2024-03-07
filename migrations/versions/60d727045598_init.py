@@ -1,8 +1,8 @@
 """init
 
-Revision ID: d3318a9859d5
+Revision ID: 60d727045598
 Revises: 
-Create Date: 2023-12-15 11:54:34.697491
+Create Date: 2024-03-07 11:31:49.015977
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd3318a9859d5'
+revision = '60d727045598'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,33 +22,39 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('display_name', sa.String(length=256), nullable=False),
+    sa.Column('short_name', sa.String(length=64), nullable=False),
     sa.Column('description', sa.String(length=512), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('display_name'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name'),
+    sa.UniqueConstraint('short_name')
     )
     op.create_table('training_module',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('display_name', sa.String(length=256), nullable=False),
+    sa.Column('short_name', sa.String(length=64), nullable=False),
     sa.Column('description', sa.String(length=512), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('display_name'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name'),
+    sa.UniqueConstraint('short_name')
     )
     op.create_table('training_type',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('display_name', sa.String(length=256), nullable=False),
+    sa.Column('short_name', sa.String(length=64), nullable=False),
     sa.Column('description', sa.String(length=512), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('display_name'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name'),
+    sa.UniqueConstraint('short_name')
     )
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=64), nullable=False),
-    sa.Column('password', sa.String(), nullable=False),
+    sa.Column('password', sa.String(length=4096), nullable=False),
     sa.Column('password_updated_on', sa.DateTime(), nullable=False),
     sa.Column('email', sa.String(length=256), nullable=True),
     sa.Column('real_name', sa.String(length=256), nullable=True),
@@ -60,8 +66,7 @@ def upgrade():
     )
     op.create_table('training_log',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('role', sa.String(length=64), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('train_date', sa.Date(), nullable=False),
     sa.Column('uploaded_on', sa.DateTime(), nullable=False),
     sa.Column('task', sa.String(length=512), nullable=False),
     sa.Column('file', sa.String(length=512), nullable=False),
@@ -91,8 +96,8 @@ def upgrade():
     sa.Column('class_student_id', sa.Integer(), nullable=True),
     sa.Column('state', sa.String(length=64), nullable=True),
     sa.Column('departure_date', sa.Date(), nullable=True),
-    sa.Column('competition_results', sa.String(), nullable=True),
-    sa.Column('honors', sa.String(), nullable=True),
+    sa.Column('competition_results', sa.Text(), nullable=True),
+    sa.Column('honors', sa.Text(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -108,7 +113,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('score', sa.Integer(), nullable=True),
     sa.Column('comment', sa.String(length=1024), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('training_log_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['training_log_id'], ['training_log.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
