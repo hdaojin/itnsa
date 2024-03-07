@@ -12,13 +12,13 @@ git clone https://github.com/hdaojin/itnsa.git
 cd itnsa
 
 # Create a virtual environment
-python3 -m venv venv
+python3 -m venv .venv
 
 # Activate the virtual environment (Linux, macOS)
-source venv/bin/activate
+source .venv/bin/activate
 
 # Activate the virtual environment (Windows)
-venv\Scripts\activate
+.venv\Scripts\activate
 
 # Install the requirements
 pip install -r requirements.txt
@@ -31,7 +31,11 @@ pip install -r requirements.txt
 # Set the default configuration of the application
 vim config.py
 
+# Generate a secret key
+python utils/gen_seckey.py
+
 # Set the environment variables
+cp .env_simple .env
 vim .env
 ```
 
