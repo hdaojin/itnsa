@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import List
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Date, DateTime, func
 from flask_login import UserMixin
 from flask_migrate import Migrate
 
@@ -30,7 +30,7 @@ user_role = db.Table(
 class User(db.Model, UserMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String, nullable=False)
+    password: Mapped[str] = mapped_column(String(65535), nullable=False)
     password_updated_on: Mapped[datetime] = mapped_column(DateTime, nullable=False, insert_default=func.now())
     email: Mapped[str] = mapped_column(String(256), unique=True, nullable=True)
     real_name: Mapped[str] = mapped_column(String(256), nullable=True)
@@ -72,8 +72,8 @@ class UserProfile(db.Model):
     class_student_id: Mapped[int] = mapped_column(Integer, nullable=True)
     state: Mapped[str] = mapped_column(String(64), nullable=True)
     departure_date: Mapped[date] = mapped_column(Date, nullable=True)
-    competition_results: Mapped[str] = mapped_column(String, nullable=True)
-    honors: Mapped[str] = mapped_column(String, nullable=True)
+    competition_results: Mapped[str] = mapped_column(Text, nullable=True)
+    honors: Mapped[str] = mapped_column(Text, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False) # one-to-one relationship with Users 
     user: Mapped['User'] = relationship(back_populates='profile', single_parent=True) # one-to-one relationship with Users 
 

@@ -9,6 +9,12 @@ def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
+<<<<<<< HEAD
+=======
+    # if production_config.py exists, load it, otherwise load default config
+    # if Path(app.instance_path).joinpath('production_config.py').exists():
+    #app.config.from_pyfile('production_config.py', silent=True)
+>>>>>>> 279dc5b0ffc97c1ad8d4ecb4f9f5b8196032a309
     app.config.from_object(app_config)
  
     try:
