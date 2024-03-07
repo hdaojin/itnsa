@@ -1,22 +1,60 @@
-# ITNSA
+# Flask Web Application Project
 
-Website for [itnsa.cn](https://itnsa.cn)
+A web application using Flask.
 
-## Commands
+## How to use
 
-Flask-migrate commands:
+### Installation
 
 ```bash
-flask --app itnsa db init
-flask --app itnsa db migrate -m "init"
+# Clone the repository
+git clone https://github.com/hdaojin/itnsa.git
+cd itnsa
+
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment (Linux, macOS)
+source venv/bin/activate
+
+# Activate the virtual environment (Windows)
+venv\Scripts\activate
+
+# Install the requirements
+pip install -r requirements.txt
+
+```
+
+### Configuration
+
+```bash
+# Set the default configuration of the application
+vim config.py
+
+# Set the environment variables
+vim .env
+```
+
+### Run the application
+
+```bash
+# Run the application
+flask  --app itnsa --debug run
+```
+
+### Initial setup
+
+Initialize the database using flask-migrate:
+
+```bash
+# flask --app itnsa db init
+# flask --app itnsa db migrate -m "init"
 flask --app itnsa db upgrade
 ```
 
-Custom flask commands:
+Import the default data using the following commands:
 
 ```bash
-flask --app itnsa database create
-flask --app itnsa database drop
-flask --app itnsa create-roles
-flask --app itnsa create-admin
+flask --app itnsa init-app
+flask --app itnsa add-admin
 ```
