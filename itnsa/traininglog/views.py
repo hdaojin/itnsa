@@ -62,7 +62,7 @@ def upload_training_log():
 
     if form.validate_on_submit():
         module = form.module.data
-        date = form.date.data
+        train_date = form.date.data
         task = form.task.data
         type = form.type.data
         file = form.file.data
@@ -77,11 +77,11 @@ def upload_training_log():
         training_type = db.session.execute(db.select(TrainingType).where(TrainingType.name==type)).scalar_one()
         complate_training_type_short_name = training_type.short_name + '训练日志'
 
-        filename = "-".join([complate_training_type_short_name, role.short_name, name, date.strftime('%Y.%m.%d'), training_module.short_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        filename = "-".join([complate_training_type_short_name, role.short_name, name, train_date.strftime('%Y.%m.%d'), training_module.short_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
 
         training_log = TrainingLog(
             module_id=training_module.id,
-            train_date=date,
+            train_date=train_date,
             task=task,
             type_id=training_type.id,
             file=filename,
@@ -97,8 +97,8 @@ def upload_training_log():
 
         # filename = secure_filename(file.filename)
         # current_month = datetime.now().strftime('%Y-%m')
-        file_year = date.strftime('%Y')
-        file_month = date.strftime('%m')
+        file_year = train_date.strftime('%Y')
+        file_month = train_date.strftime('%m')
         upload_folder_path = upload_folder.joinpath(file_year, file_month)
         
         # Create upload folder if it doesn't exist
@@ -106,13 +106,13 @@ def upload_training_log():
 
         file.save(upload_folder_path.joinpath(filename))
         flash('上传成功', 'success')
-        return redirect(url_for('traininglog.list_training_logs', month=date.strftime('%Y-%m')))
+        return redirect(url_for('traininglog.list_training_logs', month=train_date.strftime('%Y-%m')))
     else:
         print(form.errors)
     
     return render_template('traininglog/upload.html', title='上传训练日志', form = form)
 
-# 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定其他过滤条件，如角色，用户名，月份，日期等；默认以date降序排列。实现权限控制和分页功能。
+# 显示当前用户可以查看的训练日志，默认显示当前月的训练日志，可通过参数指定其他过滤条件，如角色，用户名，月份，日期等；默认以train_date降序排列。实现权限控制和分页功能。
 @traininglog.route('/list/')
 @login_required
 def list_training_logs():
@@ -162,7 +162,7 @@ def list_training_logs():
     elif role_id:
         query = base_query.where(TrainingLog.user.has(User.roles.any(Role.id == role_id)))
     elif date:
-        query = base_query.where(TrainingLog.date == date)
+        query = base_query.where(TrainingLog.train_date == date)
     else:
         query = base_query
 
@@ -299,13 +299,13 @@ def delete_training_log(id):
         if training_log.user_id != current_user.id:
             abort(403)
 
-    taining_log_path = upload_folder.joinpath(training_log.date.strftime('%Y'), training_log.date.strftime('%m'), training_log.file)
+    taining_log_path = upload_folder.joinpath(training_log.train_date.strftime('%Y'), training_log.train_date.strftime('%m'), training_log.file)
     if taining_log_path.exists():
         taining_log_path.unlink()
     db.session.delete(training_log)
     db.session.commit()
     flash('删除成功', 'success')
-    return redirect(url_for('traininglog.list_training_logs', month=training_log.date.strftime('%Y-%m')))
+    return redirect(url_for('traininglog.list_training_logs', month=training_log.train_date.strftime('%Y-%m')))
 
 
 # 日志提交情况统计功能
