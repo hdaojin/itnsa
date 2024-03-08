@@ -15,7 +15,7 @@ def inject_nav():
         ],
         'auth': [
             {'name': '登录', 'url': url_for('auth.login')},
-            {'name': '注册', 'url': url_for('auth.register')}
+            # {'name': '注册', 'url': url_for('auth.register')}
         ],
     }
     # 如果用户已登录
