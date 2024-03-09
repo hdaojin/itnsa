@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% if current_user.is_authenticated %}
+
 {% block content %}
 <style>
    .markdown-body {
@@ -22,3 +24,5 @@
 </article>
 
 {% endblock content %}
+
+{% endif %}

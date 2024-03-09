@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% if current_user.is_authenticated %}
+
 {% block content %}
 
     <ul>
@@ -9,3 +11,5 @@
     </ul>
 
 {% endblock content %}
+
+{% endif %}

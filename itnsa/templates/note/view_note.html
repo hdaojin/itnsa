@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% if current_user.is_authenticated %}
+
 {% block content %}
 
 <article class="traininglog markdown-body">
@@ -31,3 +33,5 @@
 </article>
 
 {% endblock content %}
+
+{% endif %}
