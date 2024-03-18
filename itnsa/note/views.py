@@ -1,4 +1,4 @@
-from flask import render_template, current_app
+from flask import render_template, current_app, send_from_directory
 from flask_login import login_required
 
 from pathlib import Path
@@ -59,15 +59,17 @@ def find_readme_file(directory):
             return file
     return None
 
+# 替换README.md中笔记文件的相对链接为Flask路由
+# 例如：[Ansible Getting Started](ansible-getting-started.md) -> [Ansible Getting Started](teaching-notes-Ansible/ansible-getting-started)
 def convert_links(md_content, directory):
-    # 替换README.md中笔记文件的相对链接为Flask路由
-    # 例如：[Ansible Getting Started](ansible-getting-started.md) -> [Ansible Getting Started](teaching-notes-Ansible/ansible-getting-started)
     def replace_link(match):
         text, href = match.groups()
         new_href = str(Path(directory).joinpath(href).with_suffix(''))
         return f"[{text}]({new_href})"
     return re.sub(r"\[(.*?)\]\((.*?)\)", replace_link, md_content)
 
+
+# Show README.md as html when the note folder is accessed
 @note.route('<path:directory>')
 @login_required
 def view_readme(directory):
@@ -81,6 +83,12 @@ def view_readme(directory):
         return render_template('note/view_readme.html', html=html, title=directory)
     else:
         return "README.md not found", 404
+
+# 通过send_from_directory发送图片来显示markdown中的图片
+@note.route('<path:directory>/images/<path:filename>')
+@login_required
+def send_image(directory, filename):
+    return send_from_directory(note_folder.joinpath(directory, 'images'), filename)
 
 # Convert markdown to html using markdown2 module
 def markdown2_to_html(markdown_file):
@@ -98,7 +106,14 @@ def markdown_to_html(markdown_file):
     html = markdown.markdown(content, extensions=markdown_extras)
     return html
 
-# Convert markdown to html using mistune module
+# Convert markdown to html using mistune module and frontmatter
+# frontmatter is used to parse metadata in markdown file which is in the format like this:
+# ---
+# title: "Ansible Getting Started"
+# date: "2021-08-01"
+# tags: ["ansible", "getting started"]
+# ---
+# mistune is used to convert markdown to html, it is faster than markdown2 and markdown module
 def mistune_to_html(markdown_file):
     """Convert markdown to html."""
     with open(markdown_file, 'r', encoding='utf-8') as f:
