@@ -318,6 +318,7 @@ def log_stats():
     month = request.args.get('month', default=now.month, type=int)
 
     first_day = datetime(year, month, 1).date()
+
     # 如果是当前月份，则last_day为今天的日期
     if year == now.year and month == now.month:
         last_day = now.date()
@@ -328,6 +329,11 @@ def log_stats():
 
     # 初始化每天的统计数据
     daily_stats = {day: {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []} for day in range(1, last_day.day + 1)}
+    # daily_stats = { date: {'coach': [], 'competitor_submitted': [], 'competitor_not_submitted': []} for date in [datetime(year, month, day).date() for day in range(1, last_day.day + 1)]}
+
+    # 标记出一个月中所有的周日
+    sundays = [day for day in range(1, last_day.day + 1) if datetime(year, month, day).weekday() == 6]
+
 
     # 预先查询所有的选手
     competitors_query = db.select(User).join(User.roles).where(Role.name == "competitor")
@@ -357,4 +363,4 @@ def log_stats():
         'competitors_traininglogs_count': competitors_traininglogs_count,
     }
 
-    return render_template('traininglog/stats.html', title='训练日志提交情况统计', daily_stats=daily_stats, now=now, year=year, month=month, counts=counts)
+    return render_template('traininglog/stats.html', title='训练日志提交情况统计', daily_stats=daily_stats, now=now, year=year, month=month, sundays=sundays, counts=counts)

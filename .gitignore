@@ -165,3 +165,8 @@ cython_debug/
 .AppleDouble
 .LSOverride
 
+# backup file
+*~
+.backup
+*.bak
+
