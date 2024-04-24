@@ -3,12 +3,15 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
-
+<div class="border traininglog-body">
+  <article class="markdown-body">
     <ul>
-        {% for subfolder in subfolders %}
-          <li><a href="{{ url_for('note.view_readme', directory=subfolder) }}">{{ subfolder }}</a></li>
-        {% endfor %}
+      {% for subfolder in subfolders %}
+      <li><a href="{{ url_for('note.view_readme', directory=subfolder) }}">{{ subfolder }}</a></li>
+      {% endfor %}
     </ul>
+  </article>
+</div>
 
 {% endblock content %}
 

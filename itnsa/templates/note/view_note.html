@@ -4,33 +4,61 @@
 
 {% block content %}
 
-<article class="traininglog markdown-body">
-   <div class="text-center fs-2">
-      <p>{{ meta['document'] }}({{ meta['role'] }})</p>
-   </div>
-   <table class="table table-bordered">
-      <thead class="text-center">
-         <tr>
-            <td class="key table-light">日期</td>
-            <td class="value">{{ meta['date'] }}</td>
-            <td class="key table-light">教练姓名</td>
-            <td class="value">{{ meta['author'] }}</td>
-            <td class="key table-light">模块</td>
-            <td class="value">{{meta['subject'] }}</td>
-         </tr>
-         <tr>
-            <td class="key table-light">训练任务</td>
-            <td colspan="5" class="value">{{ meta['task'] }}</td>
-         </tr>
-      </thead>
-      <tbody>
-         <tr>
-            <td colspan="6" class="value">{{ content|safe }} </td>
-         </tr>
-      </tbody>
 
-   </table>
+
+<div class="text-center fs-2">
+   <p>{{ meta['document'] }}({{ meta['role'] }})</p>
+</div>
+
+<table class="table table-bordered my-0 traininglog-body">
+   <thead class="text-center">
+      <tr>
+         <th class="table-light">日期</td>
+         <td>{{ meta['date'] }}</td>
+         <th class="table-light">教练姓名</th>
+         <td>{{ meta['author'] }}</td>
+         <th class="table-light">模块</th>
+         <td>{{meta['subject'] }}</td>
+      </tr>
+      <tr>
+         <th class="table-light">训练任务</th>
+         <td colspan="5">{{ meta['task'] }}</td>
+      </tr>
+   </thead>
+</table>
+
+<article class="markdown-body border border-top-0">
+   {{ content|safe }}
 </article>
+
+{# <div class="border border-1 border-secondary-subtle rounded-3 mx-auto" style="max-width:1845px">
+   <article class="markdown-body">
+      <table class="text-center">
+         <thead>
+            <tr>
+               <th>文档</th>
+               <th>教练姓名</th>
+               <th>角色</th>
+               <th>日期</th>
+               <th>模块</th>
+               <th>训练任务</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td>{{ meta['document'] }}</td>
+               <td>{{ meta['author'] }}</td>
+               <td>{{ meta['role'] }}</td>
+               <td>{{ meta['date'] }}</td>
+               <td>{{ meta['subject'] }}</td>
+               <td>{{ meta['task'] }}</td>
+            </tr>
+         </tbody>
+      </table>
+      {{ content|safe }}
+   </article>
+</div> #}
+
 
 {% endblock content %}
 
