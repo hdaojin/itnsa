@@ -3,7 +3,14 @@
 {% if current_user.is_authenticated %}
 
 {% block content %}
-<div class="border traininglog-body">
+
+{%if title %}
+<div class="d-flex justify-content-center pt-3 pb-3">
+    <h1>{{ title }}</h1>
+</div>
+{% endif %}
+
+<div class="traininglog-body">
   <article class="markdown-body">
     <ul>
       {% for subfolder in subfolders %}

@@ -8,11 +8,13 @@
     <meta name="description" content="WorldSkills ITNSA">
     <meta name="keywords" content="WorldSkills ITNSA">
     <meta name="author" content="Huang Daojin">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/gridjs/6.0.6/theme/mermaid.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.css"/>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.css" />
     <title>{% if title %}{{ title }} | {% endif %} ITNSA </title>
 </head>
 
@@ -27,14 +29,12 @@
         {% include 'navbar.html' %}
     </nav>
 
-    <main class="container-fluid pt-5">
+    <main class="container-fluid mt-5">
         {% include 'message.html' %}
-        <div class="d-flex justify-content-center pt-5 pb-3">
-                {%if title %}<h1>{{ title }}</h1>{% endif %}
+        <div class="pt-5">
+            {% block content %}
+            {% endblock content %}
         </div>
-        
-        {% block content %}
-        {% endblock content %}
     </main>
 
     <aside>
@@ -50,8 +50,10 @@
     <script src="https://cdn.staticfile.org/gridjs/6.0.6/gridjs.umd.js"></script>
     <!-- <script src="https://unpkg.com/gridjs/l10n/dist/l10n.umd.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     {% block script %}{% endblock script %}
 </body>
 
