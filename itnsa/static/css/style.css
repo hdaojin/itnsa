@@ -1,3 +1,7 @@
+/* body {
+    font-family: "宋体", "SimSun", "新宋体", "NSimSun", "微软雅黑", "Microsoft YaHei", "Helvetica Neue", "Helvetica", "Arial", "sans-serif",  "Times New Roman" !important;
+} */
+
 .mt-6 {
     margin-top: 6rem;
 }
@@ -37,7 +41,7 @@
 }
 
 @media print {
-    .top-menu, .print-button {
+    header, nav, aside, footer, .print-button {
         display: none !important;
     }
     pre code{
