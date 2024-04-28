@@ -4,13 +4,13 @@
 
 {% block content %}
 
-
-
+<div class="traininglog-body">
+<button class="btn btn-primary print-button float-end" onclick="window.print()">打印</button>
 <div class="text-center fs-2">
    <p>{{ meta['document'] }}({{ meta['role'] }})</p>
 </div>
 
-<table class="table table-bordered my-0 traininglog-body">
+<table class="table table-bordered my-0">
    <thead class="text-center" style="vertical-align:middle">
       <tr>
          <th class="table-light">日期</td>
@@ -30,7 +30,7 @@
 <article class="markdown-body border border-top-0">
    {{ content|safe }}
 </article>
-
+</div>
 {# <div class="border border-1 border-secondary-subtle rounded-3 mx-auto" style="max-width:1845px">
    <article class="markdown-body">
       <table class="text-center">

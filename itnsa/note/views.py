@@ -2,10 +2,12 @@ from flask import render_template, current_app, send_from_directory
 from flask_login import login_required
 
 from pathlib import Path
+import re
+
 import markdown2
 import markdown
 import mistune, frontmatter
-import re
+from bs4 import BeautifulSoup
 
 from itnsa.note import note
 
@@ -133,4 +135,6 @@ def view_note(directory, file):
     # html = markdown_to_html(markdown_file)
     html, metadata = mistune_to_html(markdown_file)
     metadata = {k.lower(): v for k, v in metadata.items()}
-    return render_template('note/view_note.html', meta=metadata, content=html)
+    soup = BeautifulSoup(html, 'html.parser')
+    h1_text = soup.h1.string if soup.h1 else ''
+    return render_template('note/view_note.html', meta=metadata, content=html, title=h1_text)
