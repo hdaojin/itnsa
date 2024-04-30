@@ -106,7 +106,7 @@ def upload_training_log():
 
         file.save(upload_folder_path.joinpath(filename))
         flash('上传成功', 'success')
-        return redirect(url_for('traininglog.list_training_logs', month=train_date.strftime('%Y-%m')))
+        return redirect(url_for('traininglog.list_training_logs', month=train_date.strftime('%Y-%m'), user_id=user_id))
     else:
         print(form.errors)
     
