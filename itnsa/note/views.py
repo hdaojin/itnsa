@@ -1,5 +1,5 @@
 from flask import render_template, current_app, send_from_directory
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from pathlib import Path
 import re
@@ -76,6 +76,9 @@ def convert_links(md_content, directory):
 @login_required
 def view_readme(directory):
     """Show README.md as html."""
+    # Only Competitors or Admin can view the note
+    if not current_user.has_role('competitor') and not current_user.has_role('admin'):
+        return "You don't have permission to view the note", 403
     readme_file_path = find_readme_file(note_folder.joinpath(directory))
     if readme_file_path:
         with open(readme_file_path, 'r', encoding='utf-8') as f:
