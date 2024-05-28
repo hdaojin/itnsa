@@ -12,6 +12,8 @@ def inject_admin_nav():
     ]
     administator_nav = [
         {'name': '管理面板', 'url': url_for('admin.index')},
+        {'name': '训练类型', 'url': url_for('admin.list_types')},
+        {'name': '添加训练类型', 'url': url_for('admin.add_training_type')},
         {'name': '训练模块', 'url': url_for('admin.list_modules')},
         {'name': '添加训练模块', 'url': url_for('admin.add_training_module')},
         {'name': '用户列表', 'url': url_for('admin.users')},
