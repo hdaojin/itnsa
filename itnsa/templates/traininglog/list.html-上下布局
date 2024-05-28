@@ -1,0 +1,132 @@
+<!-- templates/traininglog/list.html -->
+{% extends 'base.html' %}
+
+{% if current_user.is_authenticated %}
+
+{% block content %}
+
+{%if title %}
+<div class="d-flex justify-content-center pt-3 pb-3">
+    <h1>{{ title }}</h1>
+</div>
+{% endif %}
+
+<!-- <div class="py-3" style="display: grid; grid-template-columns:300px auto; gap:12px"> -->
+<div class="d-flex justify-content-start">
+    {# 使用多选表单和日期表单筛选过滤条件，生成访问参数 #}
+    <form action="{{ url_for('traininglog.list_training_logs') }}" method="get">
+        <!-- 筛选姓名 -->
+        <div class="d-flex justify-content-start">
+            <div class="me-2">筛选姓名：</div>
+            {% for user in users %}
+            <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" name="user_id" value="{{ user[0] }}"
+                    id="user_id_{{ user[0] }}" {% if user[0]==current_user.id %} checked {% endif %}>
+                <label class="form-check-label" for="user_id_{{ user[0] }}">{{ user[1] }}</label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 筛选角色 -->
+        <div class="d-flex justify-content-start mt-1">
+            <div class="me-2">筛选角色：</div>
+            {% for role in roles %}
+            <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" name="role_id" value="{{ role[0] }}"
+                    id="role_id_{{ role[0] }}">
+                <label class="form-check-label" for="role_id_{{ role[0] }}">{{ role[1] }}</label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 筛选日期 -->
+        <div class="d-flex justify-content-start mt-1">
+            <div class="me-2">筛选日期：</div>
+            <input class="form-control-sm" type="date" name="date">
+        </div>
+        <button type="submit" class="btn btn-outline-primary mt-1">筛选</button>
+    </form>
+</div>
+
+<!-- <div class="table-responsive rounded border border-secondary p-3"> -->
+<div class="table-responsive rounded border border-secondary p-3 mt-3">
+    <table id="training-logs" class="table table-hover">
+        <thead class="table-light if-text-nowrap">
+            <!-- <thead class="table-light text-nowrap"> -->
+            <tr>
+                <th>序号</th>
+                <th>姓名</th>
+                <th>角色</th>
+                <th>训练日期</th>
+                <th>训练模块</th>
+                <th>训练任务</th>
+                <th>日志文件</th>
+                <th>上传时间</th>
+                <th>完成度(%)</th>
+                <th>教练评价</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <!-- <tbody class="text-nowrap table-group-divider"> -->
+        <tbody class="table-group-divider">
+            {% for training_log in training_logs %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ training_log.user.real_name }}</td>
+                <td>
+                    {% for role in training_log.user.roles %}
+                    {%if role.name in ['coach', 'competitor']%}
+                    {{ role.display_name }}{% if not loop.last %}, {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ training_log.train_date }}</td>
+                <td>{{ training_log.module.display_name }}</td>
+                <td>{{ training_log.task | summary(30) }}</td>
+                <td><a class="text-decoration-none"
+                        href="{{ url_for('traininglog.view_training_log', id=training_log.id) }}">{{
+                        training_log.file | summary_middle(64)
+                        }}</a>
+                </td>
+                <td>{{ training_log.uploaded_on }}</td>
+                <td>
+                    {% if training_log.evaluation.score %}
+                    {{ training_log.evaluation.score }}
+                    {% else %}
+                    未评价
+                    {% endif %}
+                </td>
+                <td>
+                    {% if training_log.evaluation.comment %}
+                    {{ training_log.evaluation.comment | summary(50) }}
+                    {% else %}
+                    未评价
+                    {% endif %}
+                </td>
+                <td>
+                    {% if training_log.user_id == current_user.id %}
+                    <a class="text-decoration-none"
+                        href="{{ url_for('traininglog.delete_training_log', id=training_log.id) }}">删除</a>
+                    {% else %}
+                    删除
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{#
+<!-- 分页 -->
+<div class="d-flex justify-content-end">
+    {% from "_pagination.html" import render_pagination %}
+    {{ render_pagination(training_log_pagination, 'traininglog.list_training_logs') }}
+</div>
+#}
+
+
+{% endblock content %}
+
+{% endif %}
