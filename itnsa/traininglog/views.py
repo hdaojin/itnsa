@@ -27,9 +27,9 @@ def get_training_types():
     return [(training_type.name, training_type.display_name) for training_type in training_types]
 
 def get_special_role_of_user():
-    # 检查用户是否拥有'coach'或'competitor'角色，如果有，则返回该角色，否则返回None
+    # 检查用户是否拥有'coach'或'competitor', 'translator'角色，如果有，则返回该角色，否则返回None
     for role in current_user.roles:
-        if role.name in ['coach', 'competitor']:
+        if role.name in ['coach', 'competitor', 'translator']:
             return role
     return None
 
@@ -170,7 +170,7 @@ def list_training_logs():
         # 如果用户是管理员，则显示所有用户的训练日志列表；
         # 如果用户是教练，则显示自己和学员的训练日志（用于中国集训队时可以同时显示其他教练的日志列表）；
         # 如果用户是选手，则显示自己和所有教练的训练日志。
-        # 如果用户是游客，则只显示自己的训练日志。
+        # 如果用户是翻译，游客，则只显示自己的训练日志。
 
     # Display all training logs if user is admin
     if current_user.has_role('admin'):
