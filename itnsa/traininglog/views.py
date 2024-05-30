@@ -346,7 +346,7 @@ def log_stats():
 
     for traininglog in training_logs:
         day = traininglog.train_date.day
-        if traininglog.user.has_role('coach'):
+        if traininglog.user.has_role('coach') or traininglog.user.has_role('translator'):
             daily_stats[day]['coach'].append(traininglog.user.real_name)
         elif traininglog.user.has_role('competitor'):
             daily_stats[day]['competitor_submitted'].append(traininglog.user.real_name)
