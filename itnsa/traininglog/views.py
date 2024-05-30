@@ -256,11 +256,14 @@ def view_training_log(id):
     if current_user.has_role('admin'):
         pass
     elif current_user.has_role('coach'):
-        # if training_log.user_id != current_user.id and not any(role.name == 'competitor' for role in training_log.user.roles):
-            # abort(403)
-        pass
+        if training_log.user_id != current_user.id and not any(role.name == 'competitor' for role in training_log.user.roles):
+            abort(403)
+        # pass
     elif current_user.has_role('competitor'):
         if training_log.user_id != current_user.id and not any(role.name == 'coach' for role in training_log.user.roles):
+            abort(403)
+    elif current_user.has_role('translator'):
+        if training_log.user_id != current_user.id:
             abort(403)
     else:
         abort(403)
