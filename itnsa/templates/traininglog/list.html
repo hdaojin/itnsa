@@ -107,7 +107,7 @@
                     <td>{{ training_log.user.real_name }}</td>
                     <td>
                         {% for role in training_log.user.roles %}
-                        {%if role.name in ['coach', 'competitor']%}
+                        {%if role.name in ['coach', 'competitor', 'translator']%}
                         {{ role.display_name }}{% if not loop.last %}, {% endif %}
                         {% endif %}
                         {% endfor %}
