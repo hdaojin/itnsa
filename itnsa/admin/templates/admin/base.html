@@ -8,7 +8,7 @@
     <meta name="description" content="WorldSkills ITNSA">
     <meta name="keywords" content="WorldSkills ITNSA">
     <meta name="author" content="Huang Daojin">
-    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/bootstrap/5.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='admin/css/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/gridjs/6.0.6/theme/mermaid.min.css" />
     <title>{% if title %}{{ title }} | {% endif %} ITNSA </title>
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.staticfile.org/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="https://cdn.staticfile.org/gridjs/6.0.6/gridjs.umd.js"></script>
     <!-- <script src=" https://unpkg.com/gridjs/l10n/dist/l10n.umd.js"></script> -->
     {% block script %}{% endblock script %}
