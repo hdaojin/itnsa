@@ -38,7 +38,7 @@ markdown_extras = [
 
 # List all note folders as a list of html
 @note.route('/')
-@login_required
+# @login_required
 def list_note_folders():
     """List all subfolder in note_folder  as a list of html."""
     subfolders = [folder.name for folder in note_folder.iterdir() if folder.is_dir()]
@@ -46,7 +46,7 @@ def list_note_folders():
     return render_template('note/list_folders.html', subfolders=subfolders, title='笔记列表')
   
 # @note.route('<path:directory>')
-# @login_required
+# # @login_required
 # def list_notes(directory):
 #     """List all markdown files in note_folder as a list of html."""
 #     files = list_markdown_files(note_folder)
@@ -73,13 +73,13 @@ def convert_links(md_content, directory):
 
 # Show README.md as html when the note folder is accessed
 @note.route('<path:directory>')
-@login_required
+# @login_required
 def view_readme(directory):
     """Show README.md as html."""
     # Only Competitors or Admin can view the note
-    if not current_user.has_role('competitor') and not current_user.has_role('admin'):
-        flash("You don't have permission to view the note", 'danger')
-        return redirect(url_for('main.index')) 
+    # if not current_user.has_role('competitor') and not current_user.has_role('admin'):
+    #     flash("You don't have permission to view the note", 'danger')
+    #     return redirect(url_for('main.index')) 
     readme_file_path = find_readme_file(note_folder.joinpath(directory))
     if readme_file_path:
         with open(readme_file_path, 'r', encoding='utf-8') as f:
@@ -92,7 +92,7 @@ def view_readme(directory):
 
 # 通过send_from_directory发送图片来显示markdown中的图片
 @note.route('<path:directory>/images/<path:filename>')
-@login_required
+# @login_required
 def send_image(directory, filename):
     return send_from_directory(note_folder.joinpath(directory, 'images'), filename)
 
@@ -130,7 +130,7 @@ def mistune_to_html(markdown_file):
 
 # Show markdown file as html
 @note.route('<path:directory>/<file>')
-@login_required
+# @login_required
 def view_note(directory, file):
     """Show markdown file as html."""
     markdown_file = note_folder.joinpath(directory, file + '.md')
