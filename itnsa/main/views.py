@@ -4,6 +4,8 @@ from flask_login import current_user
 from datetime import datetime
 
 from . import main
+from itnsa.common.views import mistune_to_html
+from bs4 import BeautifulSoup
 
 
 # 注册上下文处理器，使得变量在所有模板中全局可访问. 该函数返回应用菜单的字典
@@ -44,11 +46,19 @@ def inject_nav():
 
     return dict(nav=nav)
 
+page_folder = current_app.config['PAGE_FOLDER']
+
+page_folder.mkdir(parents=True, exist_ok=True)
 
 @main.route("/")
 def index():
-    content = "这是网络系统管理项目的主页，目前任在建设中....."
-    return render_template("main/index.html", content=content)
+    markdown_file = page_folder.joinpath('index.md')
+    if markdown_file.exists():
+        html, metadata = mistune_to_html(markdown_file)
+        metadata = {k.lower(): v for k, v in metadata.items()}
+        soup = BeautifulSoup(html, 'html.parser')
+        h1_text = soup.h1.string if soup.h1 else ''
+        return render_template("main/index.html", content=html, title=h1_text)
 
 
 @main.route("/about")

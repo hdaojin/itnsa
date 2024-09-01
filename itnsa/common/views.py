@@ -1,6 +1,7 @@
 # 创建一些辅助函数，用于处理视图函数中的一些通用的操作
 from flask import render_template, flash, redirect, url_for, current_app
 from itsdangerous import URLSafeTimedSerializer
+import mistune, frontmatter
 
 from .service import BaseService
 
@@ -42,3 +43,11 @@ def validate_registration_link(token, max_age=link_age):
         return data == 'register'
     except:
         return False
+
+def mistune_to_html(markdown_file):
+    """Convert markdown to html."""
+    with open(markdown_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        metadata, content = frontmatter.parse(content)        
+        html = mistune.html(content)
+    return html, metadata
