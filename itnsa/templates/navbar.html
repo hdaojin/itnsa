@@ -27,18 +27,6 @@
                     </li>
                     {% endfor %}
 
-                    {# "教学笔记"的菜单 #}
-                    {% for item in nav.note %}
-                    <li class="nav-item">
-                        {% if item.url == request.path %}
-                        {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
-                        <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
-                        {% else %}
-                        <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
-                        {% endif %}
-                        {% endfor %}
-                    </li>
-
                     {# 用户登录后的菜单 #}
                     {% if current_user.is_authenticated %}
                     {# 上传训练日志的菜单, 使用下拉菜单的形式 #}
@@ -53,22 +41,24 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    
-                    
-                    <!-- {# 上传训练日志的菜单 #}
+
+
+                    {#
+                    上传训练日志的菜单
                     {% for item in nav.training_log %}
                     <li class="nav-item">
                         {% if item.url == request.path %}
-                        {# 如果导航菜单里的href与请求的uri相同，class就加上active #}
-                        <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
-                        {% else %}
-                        <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
-                        {% endif %}
-                        {% endfor %}
-                    </li>  -->
-                  
+                        <-- 如果导航菜单里的href与请求的uri相同，class就加上active -->
+                            <a class="nav-link active" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
+                            {% else %}
+                            <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
+                            {% endif %}
+                            {% endfor %}
+                    </li>
+                    #}
 
-                    <!-- {# "教学笔记"的菜单 #}
+
+                    {# "教学笔记"的菜单 #}
                     {% for item in nav.note %}
                     <li class="nav-item">
                         {% if item.url == request.path %}
@@ -78,7 +68,7 @@
                         <a class="nav-link" aria-current="page" href="{{ item.url }}">{{ item.name }}</a>
                         {% endif %}
                         {% endfor %}
-                    </li> -->
+                    </li>
                     {% endif %}
                 </ul>
                 <form class="d-flex my-2" role="search">
