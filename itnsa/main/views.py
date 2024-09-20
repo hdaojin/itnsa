@@ -20,7 +20,6 @@ def inject_nav():
             {"name": "登录", "url": url_for("auth.login")},
             # {'name': '注册', 'url': url_for('auth.register')}
         ],
-        "note": [{"name": "教学笔记", "url": url_for("note.list_note_folders")}],
     }
     # 如果用户已登录
     if current_user.is_authenticated:
@@ -37,6 +36,9 @@ def inject_nav():
                 {"name": "日志列表", "url": url_for("traininglog.list_training_logs")},
                 {"name": "日志统计", "url": url_for("traininglog.log_stats")},
             ],
+            "note": [
+                {"name": "教学笔记", "url": url_for("note.list_note_folders")}
+                ],
         }
         if current_user.has_role("admin"):
             user_nav["user_logged_in"].insert(
@@ -46,18 +48,20 @@ def inject_nav():
 
     return dict(nav=nav)
 
-page_folder = current_app.config['PAGE_FOLDER']
+
+page_folder = current_app.config["PAGE_FOLDER"]
 
 page_folder.mkdir(parents=True, exist_ok=True)
 
+
 @main.route("/")
 def index():
-    markdown_file = page_folder.joinpath('index.md')
+    markdown_file = page_folder.joinpath("index.md")
     if markdown_file.exists():
         html, metadata = mistune_to_html(markdown_file)
         metadata = {k.lower(): v for k, v in metadata.items()}
-        soup = BeautifulSoup(html, 'html.parser')
-        h1_text = soup.h1.string if soup.h1 else ''
+        soup = BeautifulSoup(html, "html.parser")
+        h1_text = soup.h1.string if soup.h1 else ""
         return render_template("main/index.html", content=html, title=h1_text)
 
 
