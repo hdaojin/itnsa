@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{%if title %}
+<!-- {%if title %}
 <div class="d-flex justify-content-center pt-3 pb-3">
     <h1>{{ title }}</h1>
 </div>
-{% endif %}
+{% endif %} -->
 
 <div class="row">
     <div class="col-md-6 offset-md-3">
-        {{ content }}
+        {{ content|safe }}
     </div>
 </div>
 

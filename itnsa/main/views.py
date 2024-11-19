@@ -54,18 +54,23 @@ page_folder = current_app.config["PAGE_FOLDER"]
 page_folder.mkdir(parents=True, exist_ok=True)
 
 
-@main.route("/")
-def index():
-    markdown_file = page_folder.joinpath("index.md")
+def get_page_content(page_name):
+    markdown_file = page_folder.joinpath(f"{page_name}.md")
     if markdown_file.exists():
         html, metadata = mistune_to_html(markdown_file)
         metadata = {k.lower(): v for k, v in metadata.items()}
         soup = BeautifulSoup(html, "html.parser")
         h1_text = soup.h1.string if soup.h1 else ""
-        return render_template("main/index.html", content=html, title=h1_text)
+        return html, h1_text
+    return None, None
 
+
+@main.route("/")
+def index():
+    content, title = get_page_content("index")
+    return render_template("main/index.html", content=content, title=title)
 
 @main.route("/about")
 def about():
-    content = "This is the about page"
-    return render_template("main/about.html", content=content, title="About")
+    content, title = get_page_content("about")
+    return render_template("main/about.html", content=content, title=title)
