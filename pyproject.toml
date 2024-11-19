@@ -1,0 +1,19 @@
+[project]
+name = "itnsa"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "flask-login>=0.6.3",
+    "flask-migrate>=4.0.7",
+    "flask-sqlalchemy>=3.1.1",
+    "flask-wtf>=1.2.2",
+    "flask>=3.1.0",
+    "markdown>=3.7",
+    "markdown2>=2.5.1",
+    "mistune>=3.0.2",
+    "python-dotenv",
+    "python-frontmatter>=1.1.0",
+]
