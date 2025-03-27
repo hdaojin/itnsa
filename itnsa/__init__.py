@@ -2,7 +2,7 @@ from pathlib import Path
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import app_config
-from itnsa.commands import drop_db, init_app, add_administrator
+from itnsa.commands import drop_db, init_app, add_administrator, reset_password
 
 
 def create_app():
@@ -43,6 +43,7 @@ def create_app():
     app.cli.add_command(drop_db)
     app.cli.add_command(init_app)
     app.cli.add_command(add_administrator)
+    app.cli.add_command(reset_password)
 
 
     # Custom Jinja2 filters
