@@ -5,60 +5,58 @@
 {% block content %}
 
 <div class="traininglog-body">
-<button class="btn btn-primary print-button float-end" onclick="window.print()">打印</button>
-<div class="text-center fs-2">
-   <p>{{ meta['document'] }}({{ meta['role'] }})</p>
+   {# <button class="btn btn-primary print-button float-end" onclick="window.print()">打印</button> #}
+   <div class="d-flex justify-content-between align-items-center mb-3">
+      <img src="{{ url_for('static', filename='images/gm-logo.png') }}" alt="Logo" class="logo"
+         style="max-height:40px; height:auto;">
+      <img src="{{ url_for('static', filename='images/world-skills-china.png') }}" alt="Logo" class="logo">
+   </div>
+   <div class="text-center fs-2 mb-3">
+      <p>{{ meta['class'] }}</p>
+      <p>{{ meta['document'] }}({{ meta['role'] }})</p>
+   </div>
+
+   <table class="table table-bordered border-secondary my-0">
+      <thead class="align-middle text-center">
+         <tr>
+            <th>日期</th>
+            <td>{{ meta['updated_at'] }}</td>
+            <th>教练姓名</th>
+            <td>{{ meta['author'] }}</td>
+         </tr>
+         <tr>
+            <th>训练模块</th>
+            <td>{{ meta['module'] }}</td>
+            <th>训练任务</th>
+            <td>{{ meta['task'] }}</td>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <th class="align-middle text-center">训练目标</th>
+            <td colspan="3" class="text-start">
+               {% for obj in meta['objectives'] %}
+               {{ loop.index }}. {{ obj }}<br>
+               {% endfor %}
+            </td>
+         </tr>
+         <tr>
+            <th class="align-middle text-center">训练内容</th>
+            <td colspan="3" class="text-start">
+               {% for item in meta['contents'] %}
+               {{ loop.index }}. {{ item }}<br>
+               {% endfor %}
+            </td>
+         </tr>
+         <tr>
+            <th class="align-middle text-center">过程记录</th>
+            <td colspan="3" class="markdown-body text-start">
+               {{ html | safe }}
+            </td>
+         </tr>
+      </tbody>
+   </table>
 </div>
-
-<table class="table table-bordered border-secondary my-0">
-   <thead class="text-center" style="vertical-align:middle">
-      <tr>
-         <th class="table-active">日期</td>
-         <td>{{ meta['date'] }}</td>
-         <th class="table-active">教练姓名</th>
-         <td>{{ meta['author'] }}</td>
-         <th class="table-active">模块</th>
-         <td>{{meta['subject'] }}</td>
-      </tr>
-      <tr>
-         <th class="table-active">训练任务</th>
-         <td colspan="5">{{ meta['task'] }}</td>
-      </tr>
-   </thead>
-</table>
-
-<article class="markdown-body border border-secondary border-top-0">
-   {{ content|safe }}
-</article>
-</div>
-{# <div class="border border-1 border-secondary-subtle rounded-3 mx-auto" style="max-width:1845px">
-   <article class="markdown-body">
-      <table class="text-center">
-         <thead>
-            <tr>
-               <th>文档</th>
-               <th>教练姓名</th>
-               <th>角色</th>
-               <th>日期</th>
-               <th>模块</th>
-               <th>训练任务</th>
-            </tr>
-         </thead>
-         <tbody>
-            <tr>
-               <td>{{ meta['document'] }}</td>
-               <td>{{ meta['author'] }}</td>
-               <td>{{ meta['role'] }}</td>
-               <td>{{ meta['date'] }}</td>
-               <td>{{ meta['subject'] }}</td>
-               <td>{{ meta['task'] }}</td>
-            </tr>
-         </tbody>
-      </table>
-      {{ content|safe }}
-   </article>
-</div> #}
-
 
 {% endblock content %}
 

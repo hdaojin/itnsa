@@ -6,7 +6,9 @@ import re
 
 import markdown2
 import markdown
-import mistune, frontmatter
+import mistune
+# import frontmatter
+from frontmatter import Frontmatter
 from bs4 import BeautifulSoup
 
 from itnsa.note import note
@@ -18,13 +20,18 @@ note_folder = Path(current_app.config['NOTE_FOLDER'])
 note_folder.mkdir(parents=True, exist_ok=True)
 
 markdown2_extras = [
-    "metadata",
-    "tables",
-    "code-friendly",
-    "fenced-code-blocks",
-    "break-on-newline",
-    "footnotes",
-
+        # "breaks", # Convert '\n' in paragraphs into <br>
+        "code-friendly", # Disable _ and __ for em and strong
+        "cuddled-lists", # Allow lists to be cuddled to the preceding paragraph
+        "fenced-code-blocks", # Allow code blocks to be fenced by ```
+        "metadata", # Parse metadata at the beginning of the markdown content
+        "footnotes", # Parse footnotes
+        "highlightjs-lang", # Highlight code blocks with language
+        "numbering", # Create counters to number tables,figures, equations and graphs
+        "tables", # Parse tables
+        "toc", # Generate a table of contents
+        "header-ids", # Adds "id" attribute to headers
+        "task_list", # Parse task lists
 ]
 
 markdown_extras = [
@@ -102,7 +109,9 @@ def markdown2_to_html(markdown_file):
     with open(markdown_file, 'r', encoding='utf-8') as f:
         content = f.read()
     html = markdown2.markdown(content, extras=markdown2_extras)
-    return html
+    metadata = html.metadata
+    metadata = {k.lower(): v for k, v in metadata.items() } if metadata else "OK"
+    return html, metadata
 
 # Convert markdown to html using markdown module
 def markdown_to_html(markdown_file):
@@ -124,8 +133,13 @@ def mistune_to_html(markdown_file):
     """Convert markdown to html."""
     with open(markdown_file, 'r', encoding='utf-8') as f:
         content = f.read()
-        metadata, content = frontmatter.parse(content)        
+        # metadata, content = frontmatter.parse(content)
+        post = Frontmatter.read(content)
+        metadata = post['attributes']
+        metadata = {k.lower(): v for k, v in metadata.items() } if metadata else None
+        content = post['body']        
         html = mistune.html(content)
+
     return html, metadata
 
 # Show markdown file as html
@@ -137,8 +151,8 @@ def view_note(directory, file):
     if not markdown_file.exists():
         return "File not found", 404
     # html = markdown_to_html(markdown_file)
-    html, metadata = mistune_to_html(markdown_file)
-    metadata = {k.lower(): v for k, v in metadata.items()}
+    # html, metadata = mistune_to_html(markdown_file)
+    html, metadata = markdown2_to_html(markdown_file)
     soup = BeautifulSoup(html, 'html.parser')
     h1_text = soup.h1.string if soup.h1 else ''
-    return render_template('note/view_note.html', meta=metadata, content=html, title=h1_text)
+    return render_template('note/view_note.html', meta=metadata, html=html, title=h1_text)
