@@ -3,11 +3,10 @@ from flask import render_template, request, url_for, redirect, flash, send_from_
 
 from pathlib import Path
 from datetime import datetime, timedelta
-from functools import wraps
 import calendar
 
 from flask_login import login_required, current_user
-from sqlalchemy import union_all, desc
+from sqlalchemy import  desc
 
 from itnsa.traininglog.forms import TrainingLogUploadForm, TrainingLogEvaluationForm
 from itnsa.models import db, User, Role, TrainingLog, TrainingModule, TrainingType, TrainingLogEvaluation
@@ -75,9 +74,11 @@ def upload_training_log():
         
         training_module = db.session.execute(db.select(TrainingModule).where(TrainingModule.name==module)).scalar_one()
         training_type = db.session.execute(db.select(TrainingType).where(TrainingType.name==type)).scalar_one()
-        complate_training_type_short_name = training_type.short_name + '训练日志'
+        # complate_training_type_short_name = training_type.short_name + '训练日志'
+        complate_training_type_short_name = "网络系统管理项目"
 
-        filename = "-".join([complate_training_type_short_name, role.short_name, name, train_date.strftime('%Y.%m.%d'), training_module.short_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        #filename = "-".join([complate_training_type_short_name, role.short_name, name, train_date.strftime('%Y.%m.%d'), training_module.short_name, task.replace(' ', '-')]) + '.' + file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{complate_training_type_short_name}{train_date.strftime('%Y年%m月%d日')}{role.short_name}日志-{name}.{file.filename.rsplit('.', 1)[1].lower()}"
 
         training_log = TrainingLog(
             module_id=training_module.id,
