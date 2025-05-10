@@ -5,10 +5,6 @@ from pathlib import Path
 import re
 
 import markdown2
-import markdown
-import mistune
-# import frontmatter
-from frontmatter import Frontmatter
 from bs4 import BeautifulSoup
 
 from itnsa.note import note
@@ -32,15 +28,6 @@ markdown2_extras = [
         "toc", # Generate a table of contents
         "header-ids", # Adds "id" attribute to headers
         "task_list", # Parse task lists
-]
-
-markdown_extras = [
-    # "extra",
-    # "meta",
-    # "nl2br",
-    # # "sane_lists",
-    # "toc",
-    # "smarty",
 ]
 
 # List all note folders as a list of html
@@ -113,34 +100,6 @@ def markdown2_to_html(markdown_file):
     metadata = {k.lower(): v for k, v in metadata.items() } if metadata else "OK"
     return html, metadata
 
-# Convert markdown to html using markdown module
-def markdown_to_html(markdown_file):
-    """Convert markdown to html."""
-    with open(markdown_file, 'r', encoding='utf-8') as f:
-        content = f.read()
-    html = markdown.markdown(content, extensions=markdown_extras)
-    return html
-
-# Convert markdown to html using mistune module and frontmatter
-# frontmatter is used to parse metadata in markdown file which is in the format like this:
-# ---
-# title: "Ansible Getting Started"
-# date: "2021-08-01"
-# tags: ["ansible", "getting started"]
-# ---
-# mistune is used to convert markdown to html, it is faster than markdown2 and markdown module
-def mistune_to_html(markdown_file):
-    """Convert markdown to html."""
-    with open(markdown_file, 'r', encoding='utf-8') as f:
-        content = f.read()
-        # metadata, content = frontmatter.parse(content)
-        post = Frontmatter.read(content)
-        metadata = post['attributes']
-        metadata = {k.lower(): v for k, v in metadata.items() } if metadata else None
-        content = post['body']        
-        html = mistune.html(content)
-
-    return html, metadata
 
 # Show markdown file as html
 @note.route('<path:directory>/<file>')
@@ -150,8 +109,6 @@ def view_note(directory, file):
     markdown_file = note_folder.joinpath(directory, file + '.md')
     if not markdown_file.exists():
         return "File not found", 404
-    # html = markdown_to_html(markdown_file)
-    # html, metadata = mistune_to_html(markdown_file)
     html, metadata = markdown2_to_html(markdown_file)
     soup = BeautifulSoup(html, 'html.parser')
     h1_text = soup.h1.string if soup.h1 else ''

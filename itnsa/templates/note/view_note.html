@@ -54,6 +54,24 @@
                {{ html | safe }}
             </td>
          </tr>
+         <tr>
+            <th class="align-middle text-center">总结</th>
+            <td colspan="3" class="text-start">
+               <p class="fw-bold">训练目标达成情况：</p>
+               <p>{{ meta['summary'].Results }}</p>
+               <p class="fw-bold">不足之处：</p>
+               <p>{{ meta['summary'].Weaknesses }}</p>
+               <p class="fw-bold">改进方向：</p>
+               <p>{{ meta['summary'].Recommendations }}</p>
+            </td>
+         </tr>
+         <tr>
+            <th class="align-middle text-center">填写人</th>
+            <td colspan="3" class="align-middle text-start">
+               黄道金
+            </td>
+         </tr>
+
       </tbody>
    </table>
 </div>
