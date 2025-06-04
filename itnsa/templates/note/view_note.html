@@ -17,23 +17,20 @@
    </div>
 
    <table class="table table-bordered border-secondary my-0">
-      <thead class="align-middle text-center">
-         <tr>
-            <th>日期</th>
+         <tr class="align-middle text-center text-nowrap">
+            <th style="width:100px;">日期</th>
             <td>{{ meta['updated_at'] }}</td>
-            <th>教练姓名</th>
+            <th style="width:100px;">教练姓名</th>
             <td>{{ meta['author'] }}</td>
          </tr>
-         <tr>
-            <th>训练模块</th>
+         <tr class="align-middle text-center text-nowrap">
+            <th style="width: 100px;">训练模块</th>
             <td>{{ meta['module'] }}</td>
-            <th>训练任务</th>
+            <th style="width: 100px;">训练任务</th>
             <td>{{ meta['task'] }}</td>
          </tr>
-      </thead>
-      <tbody>
          <tr>
-            <th class="align-middle text-center">训练目标</th>
+            <th class="align-middle text-center" style="width: 100px;">训练目标</th>
             <td colspan="3" class="text-start">
                {% for obj in meta['objectives'] %}
                {{ loop.index }}. {{ obj }}<br>
@@ -41,7 +38,7 @@
             </td>
          </tr>
          <tr>
-            <th class="align-middle text-center">训练内容</th>
+            <th class="align-middle text-center" style="width: 100px;">训练内容</th>
             <td colspan="3" class="text-start">
                {% for item in meta['contents'] %}
                {{ loop.index }}. {{ item }}<br>
@@ -49,13 +46,13 @@
             </td>
          </tr>
          <tr>
-            <th class="align-middle text-center">过程记录</th>
+            <th class="text-center" style="width: 100px;">过程记录</th>
             <td colspan="3" class="markdown-body text-start">
                {{ html | safe }}
             </td>
          </tr>
          <tr>
-            <th class="align-middle text-center">总结</th>
+            <th class="align-middle text-center" style="width: 100px;">总结</th>
             <td colspan="3" class="text-start">
                <p class="fw-bold">训练目标达成情况：</p>
                <p>{{ meta['summary'].Results }}</p>
@@ -66,13 +63,12 @@
             </td>
          </tr>
          <tr>
-            <th class="align-middle text-center">填写人</th>
+            <th class="align-middle text-center" style="width: 100px;">填写人</th>
             <td colspan="3" class="align-middle text-start">
                黄道金
             </td>
          </tr>
 
-      </tbody>
    </table>
 </div>
 
